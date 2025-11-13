@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beranda - KuloSehat</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        [x-cloak] {
+            display: none !important;
+        }
+        .hero-gradient {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.22), transparent 55%),
+                radial-gradient(circle at 90% 0%, rgba(190, 242, 100, 0.25), transparent 50%);
+        }
+        .hero-card {
+            border-radius: 32px;
+            box-shadow: 0 25px 45px rgba(15, 118, 110, 0.12);
+            background: rgba(255, 255, 255, 0.98);
+        }
+        .hero-glow {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(34, 197, 94, 0.9), rgba(76, 201, 240, 0.85));
+            border-radius: 40px;
+            transform: rotate(-4deg);
+            filter: drop-shadow(0 20px 40px rgba(34, 197, 94, 0.35));
+        }
+        .robot-fade {
+            mask-image: linear-gradient(180deg, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%);
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-900 antialiased bg-gradient-to-br from-green-400 to-lime-500">
+
+    <x-public-navbar />
+
+    <main class="min-h-screen">
+        <section class="relative pt-24 sm:pt-32 md:pt-36 pb-14 sm:pb-20 md:pb-24 overflow-hidden">
+            <div class="hero-gradient"></div>
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div class="hero-card px-6 py-10 sm:px-10 md:px-16 flex flex-col md:flex-row items-center gap-10 md:gap-12">
+                    <div class="w-full md:w-1/2 text-center md:text-left">
+                        <p class="text-xs sm:text-sm uppercase tracking-[0.35em] text-gray-400 font-semibold">Panel Dokter</p>
+                        <h1 class="mt-4 text-3xl sm:text-4xl md:text-5xl font-bold leading-tight text-gray-900">
+                            Halo, {{ $userName }} 👋<br>
+                            <span class="text-green-600">Kelola Artikel Medis</span><br>
+                            dan bantu pasien lebih baik
+                        </h1>
+                        <p class="mt-5 text-base text-gray-600 max-w-xl mx-auto md:mx-0">Anda telah menerbitkan <span class="font-semibold text-green-600">{{ $totalArticles }}</span> artikel edukasi. Terus bagikan pengetahuan medis agar masyarakat semakin paham kesehatannya.</p>
+                        <div class="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
+                            <a href="{{ route('doctor.articles.index') }}" class="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-7 rounded-full shadow-lg shadow-green-500/40 transition">
+                                Kelola Artikel
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.5 4.5l6 6-6 6M4.5 12h15"/>
+                                </svg>
+                            </a>
+                            <a href="{{ route('doctor.articles.create') }}" class="inline-flex items-center gap-2 border border-gray-200 text-gray-700 font-semibold py-3 px-7 rounded-full hover:border-green-300 hover:text-green-600 transition">
+                                + Buat Artikel Baru
+                            </a>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 relative flex justify-center">
+                        <div class="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80">
+                            <div class="hero-glow"></div>
+                            <img src="{{ asset('images/illustrations/sdsja9du9ahdpo 1.png') }}" alt="Robot Dokter" class="absolute inset-0 w-full h-full object-contain robot-fade">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="artikel-terbaru" class="bg-gray-50 py-20 -mt-1 relative z-10">
+            <div class="max-w-5xl mx-auto px-6 lg:px-8">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl">
+                    <div class="p-6 md:p-10">
+                        <div class="flex justify-between items-center mb-10">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800">Artikel Publik Terbaru</h2>
+                                <p class="text-sm text-gray-500">Jadikan referensi sebelum menulis artikel baru.</p>
+                            </div>
+                            <a href="{{ route('articles.public.index') }}" class="text-sm text-green-600 font-semibold hover:underline">Lihat semua artikel ></a>
+                        </div>
+                        <div class="space-y-6">
+                            @forelse ($latestArticles as $article)
+                                <div class="bg-white rounded-[24px] shadow-[0_0_35px_rgba(16,185,129,0.12)] overflow-hidden flex flex-col md:flex-row md:items-center">
+                                    <div class="w-full md:w-1/3">
+                                        <a href="{{ route('articles.public.show', $article->slug) }}" class="block h-full">
+                                            <img src="{{ asset('storage/' . $article->image) }}" alt="{{ $article->title }}" class="w-full h-48 md:h-52 object-cover">
+                                        </a>
+                                    </div>
+                                    <div class="md:w-2/3 p-6 sm:p-8 flex flex-col h-full">
+                                        <p class="text-xs sm:text-sm text-gray-400">{{ $article->created_at->isoFormat('dddd, D MMMM YYYY, HH:mm') }} WIB</p>
+                                        <h3 class="mt-2 text-xl sm:text-2xl font-semibold text-gray-900 leading-snug">
+                                            <a href="{{ route('articles.public.show', $article->slug) }}" class="hover:text-green-600 transition">{{ $article->title }}</a>
+                                        </h3>
+                                        <p class="mt-3 text-gray-600 leading-relaxed text-sm sm:text-base flex-1">{{ Str::limit(strip_tags($article->content), 220) }}</p>
+                                        <div class="mt-5 flex flex-wrap gap-3">
+                                            <a href="{{ route('articles.public.show', $article->slug) }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-green-500 text-white font-semibold rounded-full shadow-lg shadow-green-500/30 hover:bg-green-600 transition text-sm">
+                                                Baca Artikel
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.5 4.5l6 6-6 6M4.5 12h15"/>
+                                                </svg>
+                                            </a>
+                                            <a href="{{ route('doctor.articles.create') }}" class="inline-flex items-center gap-2 px-6 py-2.5 border border-gray-200 text-gray-700 font-semibold rounded-full hover:border-green-300 hover:text-green-600 transition text-sm">
+                                                Buat Artikel Serupa
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-16"><p class="text-gray-500 text-lg">Belum ada artikel publik.</p></div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
