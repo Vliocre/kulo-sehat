@@ -11,7 +11,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-lime-500 px-4 sm:px-6 lg:px-8">
+        <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 px-4 sm:px-6 lg:px-8">
             <div class="max-w-4xl w-full grid md:grid-cols-2 items-center gap-8">
 
                 <!-- Kolom Teks di Kiri -->
@@ -43,14 +43,14 @@
                             <!-- Email Address -->
                             <div>
                                 <label for="email" class="block font-medium text-sm text-gray-700 sr-only">Email</label>
-                                <input id="email" class="block mt-1 w-full border-gray-300 rounded-full shadow-sm focus:border-green-500 focus:ring-green-500 px-4 py-3" placeholder="Masukkan Email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                                <input id="email" class="block mt-1 w-full border-gray-300 rounded-full shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-3" placeholder="Masukkan Email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
                                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
                             </div>
 
                             <!-- Password -->
                             <div class="mt-4">
                                 <label for="password" class="block font-medium text-sm text-gray-700 sr-only">Password</label>
-                                <input id="password" class="block mt-1 w-full border-gray-300 rounded-full shadow-sm focus:border-green-500 focus:ring-green-500 px-4 py-3" placeholder="Masukkan Password"
+                                <input id="password" class="block mt-1 w-full border-gray-300 rounded-full shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-3" placeholder="Masukkan Password"
                                                 type="password"
                                                 name="password"
                                                 required autocomplete="current-password" />
@@ -61,19 +61,19 @@
                             <!-- Remember Me -->
                             <div class="block mt-4">
                                 <label for="remember_me" class="inline-flex items-center">
-                                    <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500" name="remember">
+                                    <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-emerald-600 shadow-sm focus:ring-emerald-500" name="remember">
                                     <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
                                 </label>
                             </div>
 
                             <div class="flex items-center justify-end mt-4">
                                 @if (Route::has('password.request'))
-                                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" href="{{ route('password.request') }}">
+                                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" href="{{ route('password.request') }}">
                                         {{ __('Lupa password?') }}
                                     </a>
                                 @endif
 
-                                <button type="submit" class="ms-3 text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-6 py-3 text-center">
+                                <button type="submit" class="ms-3 text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 font-medium rounded-full text-sm px-6 py-3 text-center">
                                     {{ __('Log in') }}
                                 </button>
                             </div>

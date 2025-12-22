@@ -19,6 +19,12 @@
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10" />',
             'pattern' => 'admin.articles.*',
         ],
+        [
+            'label' => 'Konten Topik',
+            'route' => 'admin.topic-guides.index',
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 12h10M5 17h8" />',
+            'pattern' => 'admin.topic-guides.*',
+        ],
     ];
 @endphp
 <!DOCTYPE html>
@@ -28,6 +34,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $documentTitle }} • KuloSehat</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body class="font-sans bg-gradient-to-br from-emerald-50 via-white to-lime-100 text-gray-900">
     <div class="min-h-screen flex">

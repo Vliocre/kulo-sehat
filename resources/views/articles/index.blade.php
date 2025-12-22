@@ -11,9 +11,16 @@
         [x-cloak] {
             display: none !important;
         }
+        .page-bg {
+            background-color: #f5faf7;
+            background-image:
+                radial-gradient(18% 24% at 15% 18%, rgba(52, 211, 153, 0.08), transparent 50%),
+                radial-gradient(22% 26% at 82% 10%, rgba(34, 197, 94, 0.07), transparent 48%),
+                linear-gradient(135deg, #f9fdfb 0%, #edf6f1 45%, #e9f3ef 100%);
+        }
     </style>
 </head>
-<body class="font-sans text-gray-900 antialiased bg-gray-50 min-h-screen">
+<body class="page-bg font-sans text-gray-900 antialiased min-h-screen">
 
     <x-public-navbar />
 
@@ -29,6 +36,14 @@
             @if (!empty($search))
                 <div class="mt-4 text-sm text-gray-600">
                     Menampilkan hasil untuk: <span class="font-semibold text-gray-900">"{{ $search }}"</span>
+                </div>
+            @endif
+
+            @if ($selectedCategory)
+                <div class="mt-2 text-sm text-gray-600 flex items-center gap-2">
+                    <span>Filter kategori:</span>
+                    <span class="font-semibold text-gray-900">{{ $selectedCategory->name }}</span>
+                    <a href="{{ route('articles.public.index', array_filter(['search' => $search], fn ($value) => !is_null($value) && $value !== '')) }}" class="text-green-600 hover:text-green-700 text-xs font-semibold uppercase tracking-wide">Hapus Filter</a>
                 </div>
             @endif
 
@@ -66,7 +81,7 @@
             </div>
 
             <div class="mt-10">
-                {{ $articles->appends(['search' => $search])->links() }}
+                {{ $articles->appends(request()->only('search', 'category'))->links() }}
             </div>
         </div>
     </main>

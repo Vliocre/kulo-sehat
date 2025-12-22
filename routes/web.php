@@ -8,11 +8,16 @@ use App\Models\Article;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CategoryLandingController;
+use App\Http\Controllers\TopicLandingController;
+use App\Http\Controllers\TopicsExplorerController;
+use App\Http\Controllers\AuthorProfileController;
 use App\Http\Controllers\Doctor\DashboardController as DoctorDashboardController;
 use App\Http\Controllers\Doctor\ArticleController as DoctorArticleController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
+use App\Http\Controllers\Admin\TopicGuideController as AdminTopicGuideController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,8 +27,12 @@ use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 
 // RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/artikel', [ArticleController::class, 'index'])->name('articles.public.index');
-Route::get('/artikel/{article:slug}', [ArticleController::class, 'show'])->name('articles.public.show');
+Route::get('/artikel', [ArticleController::class, 'index'])->middleware('auth')->name('articles.public.index');
+Route::get('/artikel/{article:slug}', [ArticleController::class, 'show'])->middleware('auth')->name('articles.public.show');
+Route::get('/kategori/{slug}', [CategoryLandingController::class, 'show'])->middleware('auth')->name('categories.show');
+Route::get('/kategori/{category}/{topic}', [TopicLandingController::class, 'show'])->middleware('auth')->name('topics.show');
+Route::get('/panduan-topik', [TopicsExplorerController::class, 'index'])->middleware('auth')->name('topics.all');
+Route::get('/penulis/{user}', [AuthorProfileController::class, 'show'])->name('authors.show');
 
 
 // RUTE OTENTIKASI
@@ -76,6 +85,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::resource('users', UserManagementController::class);
         Route::resource('articles', AdminArticleController::class);
+        Route::post('topic-guides/import-defaults', [AdminTopicGuideController::class, 'importDefaults'])->name('topic-guides.import-defaults');
+        Route::resource('topic-guides', AdminTopicGuideController::class)->except(['show']);
 });
 
 

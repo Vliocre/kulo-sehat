@@ -1,7 +1,13 @@
 @props([
     'class' => 'absolute top-0 left-0 right-0 z-20 px-4 pt-4',
     'showSearch' => true,
+    'categories' => collect(),
+    'activeCategorySlug' => request()->query('category'),
 ])
+
+@php
+    $categoryItems = collect($categories);
+@endphp
 
 <header {{ $attributes->merge(['class' => $class]) }}>
     <div class="max-w-7xl mx-auto bg-white/95 backdrop-blur-sm rounded-[32px] shadow-lg">
@@ -22,21 +28,29 @@
                             <svg class="w-4 h-4 ml-1 transform transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
 
-                    <div x-cloak
-                         x-show="open"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 transform -translate-y-2"
-                         x-transition:enter-end="opacity-100 transform translate-y-0"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 transform translate-y-0"
-                         x-transition:leave-end="opacity-0 transform -translate-y-2"
-                         class="absolute mt-3 w-40 bg-white rounded-xl shadow-xl py-2">
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-green-50 transition-colors">Bayi</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-green-50 transition-colors">Remaja</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-green-50 transition-colors">Dewasa</a>
-                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-green-50 transition-colors">Lansia</a>
+                        <div x-cloak
+                             x-show="open"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 transform -translate-y-2"
+                             x-transition:enter-end="opacity-100 transform translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 transform translate-y-0"
+                             x-transition:leave-end="opacity-0 transform -translate-y-2"
+                             class="absolute mt-3 w-48 bg-white rounded-xl shadow-xl py-2">
+
+                            @forelse ($categoryItems as $category)
+                                @php
+                                    $isActive = $activeCategorySlug === $category->slug;
+                                @endphp
+                                <a href="{{ route('categories.show', $category->slug) }}"
+                                   class="block px-4 py-2 text-sm transition-colors rounded-lg {{ $isActive ? 'text-green-600 bg-green-50' : 'text-gray-700 hover:bg-green-50' }}">
+                                    {{ $category->name }}
+                                </a>
+                            @empty
+                                <span class="block px-4 py-2 text-sm text-gray-500">Belum ada kategori</span>
+                            @endforelse
+                        </div>
                     </div>
-                </div>
 
                     <a href="{{ route('articles.public.index') }}" class="text-gray-700 hover:text-green-600 font-medium transition-colors">Artikel</a>
                 </div>
@@ -66,8 +80,8 @@
 
                     @auth
                         <div x-data="{ open: false }" class="relative" @click.away="open = false">
-                            <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
-                                <span class="font-semibold text-gray-700">{{ Auth::user()->name }}</span>
+                            <button @click="open = !open" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-4 h-10 min-w-[96px] text-sm font-semibold text-gray-700 hover:border-green-300 hover:text-green-600 transition focus:outline-none">
+                                <span class="max-w-[140px] truncate">{{ Auth::user()->name }}</span>
                                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
                             <div x-cloak
@@ -93,10 +107,10 @@
                         </div>
                     @else
                         <div class="flex items-center gap-2 flex-wrap justify-center lg:justify-end w-full">
-                            <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 rounded-full border border-gray-200 hover:border-green-300 hover:text-green-600 transition">
+                            <a href="{{ route('login') }}" class="inline-flex items-center justify-center h-10 min-w-[96px] px-4 text-sm font-semibold text-gray-700 rounded-full border border-gray-200 hover:border-green-300 hover:text-green-600 transition">
                                 Login
                             </a>
-                            <a href="{{ route('register') }}" class="px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-full hover:bg-green-600 transition w-full sm:w-auto text-center">
+                            <a href="{{ route('register') }}" class="inline-flex items-center justify-center h-10 min-w-[96px] px-4 text-sm font-semibold text-white bg-green-500 rounded-full hover:bg-green-600 transition w-full sm:w-auto text-center">
                                 Daftar
                             </a>
                         </div>

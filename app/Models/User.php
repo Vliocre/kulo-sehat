@@ -21,6 +21,10 @@ class User extends Authenticatable
         'email',
         'password',
         'role', // <-- PENTING: Tambahkan 'role' di sini.
+        'phone',
+        'workplace',
+        'specialty',
+        'about',
     ];
     // PENJELASAN $fillable: Ini adalah daftar "izin". Laravel hanya akan
     // mengizinkan kolom-kolom dalam daftar ini untuk diisi secara otomatis
