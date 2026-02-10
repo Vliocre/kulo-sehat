@@ -3,30 +3,36 @@
 namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Untuk mengambil data user yg login
-use App\Models\Article; // Untuk menghitung artikel
+use Illuminate\Support\Facades\Auth;
+use App\Models\Article;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Ambil ID user yang sedang login
-        $userId = Auth::id();
+        $user = Auth::user();
 
-        // Ambil nama lengkap user dari database
-        $userName = Auth::user()->name;
+        // Total artikel milik dokter
+        $totalArticles = Article::where('user_id', $user->id)->count();
 
-        // Hitung jumlah artikel yang dibuat oleh user ini
-        $totalArticles = Article::where('user_id', $userId)->count();
-
-        // Ambil artikel terbaru (publik) untuk ditampilkan seperti dashboard pengguna
-        $latestArticles = Article::where('status', 'published')
+        // Artikel terbaru milik dokter (untuk ringkasan dashboard)
+        $latestDoctorArticles = Article::where('user_id', $user->id)
             ->latest()
-            ->take(3)
+            ->take(5)
             ->get();
 
-        // Kirim semua data yang kita dapat ke view
-        return view('doctor.dashboard', compact('userName', 'totalArticles', 'latestArticles'));
+        // Artikel publik terbaru (status published)
+        $latestPublicArticles = Article::with('category')
+            ->where('status', 'published')
+            ->latest()
+            ->take(6)
+            ->get();
+
+        return view('doctor.dashboard', compact(
+            'user',
+            'totalArticles',
+            'latestDoctorArticles',
+            'latestPublicArticles'
+        ));
     }
 }

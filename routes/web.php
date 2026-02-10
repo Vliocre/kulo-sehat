@@ -75,6 +75,12 @@ Route::middleware(['auth', 'verified', 'role:dokter'])
         Route::get('/dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
         Route::resource('articles', DoctorArticleController::class);
 });
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dokter/dashboard', function () {
+        return view('doctor.dashboard');
+    })->name('dokter.dashboard');
+}); 
+
 
 
 // RUTE KHUSUS ADMIN
