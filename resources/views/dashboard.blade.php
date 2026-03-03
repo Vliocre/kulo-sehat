@@ -155,27 +155,6 @@
             </div>
         </section>
 
-        {{-- Collaborations --}}
-        <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-10">
-            <div class="grid lg:grid-cols-3 gap-6">
-                @foreach ($collabs as $item)
-                    <div class="bg-white rounded-3xl shadow-[0_18px_40px_rgba(0,0,0,0.08)] ring-1 ring-slate-100 overflow-hidden">
-                        <div class="h-40">
-                            <img src="{{ $item['image'] }}" alt="{{ $item['title'] }}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="p-5 space-y-2">
-                            <h3 class="text-lg font-semibold text-slate-900">{{ $item['title'] }}</h3>
-                            <p class="text-sm text-slate-600">{{ $item['desc'] }}</p>
-                            <div class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
-                                Learn more
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-
         {{-- CTA --}}
         <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-10">
             <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-700 to-emerald-500 text-white shadow-[0_26px_70px_rgba(15,23,42,0.18)]">
