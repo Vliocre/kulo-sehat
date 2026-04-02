@@ -70,14 +70,21 @@
 
                             <!-- 🔹 Pilihan Role (User / Dokter) -->
                             <div class="mt-5">
-                                <p class="text-sm font-medium text-gray-700 mb-2">Masuk sebagai</p>
+                                <div class="mb-2 flex items-center justify-between gap-3">
+                                    <p class="text-sm font-medium text-gray-700">Masuk sebagai</p>
+                                    <button type="button"
+                                            id="clear-role"
+                                            class="text-xs font-medium text-emerald-600 hover:text-emerald-700">
+                                        Kosongkan pilihan
+                                    </button>
+                                </div>
                                 <div class="flex gap-6">
                                     <label class="inline-flex items-center">
                                         <input type="radio"
                                                name="role"
                                                value="pengguna"
                                                class="text-emerald-600 focus:ring-emerald-500"
-                                               {{ old('role', 'pengguna') === 'pengguna' ? 'checked' : '' }}>
+                                               {{ old('role') === 'pengguna' ? 'checked' : '' }}>
                                         <span class="ml-2 text-sm text-gray-700">User</span>
                                     </label>
 
@@ -90,6 +97,7 @@
                                         <span class="ml-2 text-sm text-gray-700">Dokter</span>
                                     </label>
                                 </div>
+                                <p class="mt-2 text-xs text-gray-500">Kosongkan pilihan ini jika login sebagai admin.</p>
                                 <x-input-error :messages="$errors->get('role')" class="mt-2" />
                             </div>
 
@@ -132,5 +140,21 @@
                 </div>
             </div>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const clearRoleButton = document.getElementById('clear-role');
+                const roleInputs = document.querySelectorAll('input[name="role"]');
+
+                if (!clearRoleButton || roleInputs.length === 0) {
+                    return;
+                }
+
+                clearRoleButton.addEventListener('click', function () {
+                    roleInputs.forEach(function (input) {
+                        input.checked = false;
+                    });
+                });
+            });
+        </script>
     </body>
 </html>

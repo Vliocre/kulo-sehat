@@ -19,6 +19,23 @@
                 <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="mt-2 w-full rounded-2xl border-gray-200 focus:border-emerald-400 focus:ring-emerald-200" required>
                 @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
+            <div class="grid gap-6 md:grid-cols-3">
+                <div>
+                    <label for="age" class="text-sm font-semibold text-gray-700">Umur</label>
+                    <input type="number" name="age" id="age" value="{{ old('age', $user->age) }}" class="mt-2 w-full rounded-2xl border-gray-200 focus:border-emerald-400 focus:ring-emerald-200" min="0">
+                    @error('age') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label for="height" class="text-sm font-semibold text-gray-700">Tinggi (cm)</label>
+                    <input type="number" step="0.01" name="height" id="height" value="{{ old('height', $user->height) }}" class="mt-2 w-full rounded-2xl border-gray-200 focus:border-emerald-400 focus:ring-emerald-200" min="0">
+                    @error('height') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label for="weight" class="text-sm font-semibold text-gray-700">Berat (kg)</label>
+                    <input type="number" step="0.01" name="weight" id="weight" value="{{ old('weight', $user->weight) }}" class="mt-2 w-full rounded-2xl border-gray-200 focus:border-emerald-400 focus:ring-emerald-200" min="0">
+                    @error('weight') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+            </div>
             <div>
                 <label for="role" class="text-sm font-semibold text-gray-700">Peran</label>
                 <select name="role" id="role" class="mt-2 w-full rounded-2xl border-gray-200 focus:border-emerald-400 focus:ring-emerald-200" required>

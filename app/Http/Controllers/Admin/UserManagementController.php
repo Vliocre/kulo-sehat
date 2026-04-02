@@ -38,6 +38,9 @@ class UserManagementController extends Controller
             // Pastikan email unik, KECUALI untuk user ini sendiri
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'role' => 'required|string|in:admin,dokter,pengguna', // Pastikan role-nya valid
+            'age' => 'nullable|integer|min:0',
+            'height' => 'nullable|numeric|min:0',
+            'weight' => 'nullable|numeric|min:0',
         ]);
 
         // 2. Update data pengguna
@@ -45,6 +48,9 @@ class UserManagementController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
+            'age' => $request->age,
+            'height' => $request->height,
+            'weight' => $request->weight,
         ]);
 
         // 3. Redirect kembali ke halaman daftar pengguna dengan pesan sukses

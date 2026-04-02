@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'role' => ['required', 'string', 'in:admin,dokter,pengguna'],
+            'role' => ['nullable', 'string', 'in:dokter,pengguna'],
         ];
     }
 
@@ -42,15 +43,45 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password', 'role'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $credentials = [
+            'email' => Str::lower($this->string('email')->toString()),
+            'password' => $this->string('password')->toString(),
+        ];
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (! $user || ! Auth::validate($credentials)) {
+            $this->throwFailedAuthentication('email', trans('auth.failed'));
         }
 
+        $selectedRole = $this->input('role');
+
+        if ($user->role === 'admin') {
+            if ($selectedRole) {
+                $this->throwFailedAuthentication('role', 'Admin tidak perlu memilih User atau Dokter saat login.');
+            }
+        } else {
+            if (! $selectedRole) {
+                $this->throwFailedAuthentication('role', 'Pilih User atau Dokter sesuai akun yang didaftarkan.');
+            }
+
+            if ($selectedRole !== $user->role) {
+                $this->throwFailedAuthentication('role', 'Pilihan login tidak sesuai dengan akun yang terdaftar.');
+            }
+        }
+
+        Auth::login($user, $this->boolean('remember'));
+
         RateLimiter::clear($this->throttleKey());
+    }
+
+    protected function throwFailedAuthentication(string $field, string $message): never
+    {
+        RateLimiter::hit($this->throttleKey());
+
+        throw ValidationException::withMessages([
+            $field => $message,
+        ]);
     }
 
     /**

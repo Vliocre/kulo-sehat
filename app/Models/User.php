@@ -19,6 +19,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'age',
+        'height',
+        'weight',
         'password',
         'role', // <-- PENTING: Tambahkan 'role' di sini.
         'phone',

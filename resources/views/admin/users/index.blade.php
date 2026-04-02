@@ -24,6 +24,9 @@
                         <tr>
                             <th class="px-5 py-3 text-left">Nama</th>
                             <th class="px-5 py-3 text-left">Email</th>
+                            <th class="px-5 py-3 text-left">Umur</th>
+                            <th class="px-5 py-3 text-left">Tinggi</th>
+                            <th class="px-5 py-3 text-left">Berat</th>
                             <th class="px-5 py-3 text-left">Peran</th>
                             <th class="px-5 py-3 text-left">Bergabung</th>
                             <th class="px-5 py-3 text-center">Aksi</th>
@@ -34,6 +37,9 @@
                             <tr>
                                 <td class="px-5 py-4 text-gray-900">{{ $user->name }}</td>
                                 <td class="px-5 py-4 text-gray-600">{{ $user->email }}</td>
+                                <td class="px-5 py-4 text-gray-600">{{ $user->age ?? '-' }}</td>
+                                <td class="px-5 py-4 text-gray-600">{{ $user->height ? rtrim(rtrim(number_format($user->height, 2, '.', ''), '0'), '.') . ' cm' : '-' }}</td>
+                                <td class="px-5 py-4 text-gray-600">{{ $user->weight ? rtrim(rtrim(number_format($user->weight, 2, '.', ''), '0'), '.') . ' kg' : '-' }}</td>
                                 <td class="px-5 py-4">
                                     <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
                                         @class([
@@ -50,7 +56,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-6 text-center text-gray-500">Tidak ada data pengguna ditemukan.</td>
+                                <td colspan="8" class="px-5 py-6 text-center text-gray-500">Tidak ada data pengguna ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>

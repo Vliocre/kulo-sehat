@@ -20,17 +20,18 @@
 </head>
 <body class="page-bg font-sans antialiased min-h-screen relative">
 <x-public-navbar />
+
 @php
     $totalKeluhan = $keluhans->count();
     $menunggu = $keluhans->where('status','menunggu')->count();
     $dijawab = $keluhans->where('status','dijawab')->count();
 @endphp
-<main class="relative overflow-hidden pt-24">
+<main class="relative overflow-hidden pt-24 ">
 <div class="max-w-6xl mx-auto pb-10 px-4 sm:px-6 lg:px-8 relative">
     <div class="pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-emerald-300/20 blur-3xl animate-[glow_6s_ease-in-out_infinite]"></div>
     <div class="pointer-events-none absolute top-36 -left-10 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl animate-[glow_7s_ease-in-out_infinite]"></div>
 
-    <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-emerald-700 via-emerald-600 to-emerald-500 text-white p-6 sm:p-8 shadow-[0_24px_60px_rgba(16,185,129,0.35)] animate-[fade-in_500ms_ease-out]">
+    <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-emerald-700 mt-10 via-emerald-600 to-emerald-500 text-white p-6 sm:p-8 shadow-[0_24px_60px_rgba(16,185,129,0.35)] animate-[fade-in_500ms_ease-out]">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.2),transparent_35%)]"></div>
         <div class="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
             <div>
