@@ -25,6 +25,12 @@
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 12h10M5 17h8" />',
             'pattern' => 'admin.topic-guides.*',
         ],
+        [
+            'label' => 'Keluhan User',
+            'route' => 'admin.keluhan',
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2 2m6-2a8 8 0 11-16 0 8 8 0 0116 0z" />',
+            'pattern' => 'admin.keluhan*',
+        ],
     ];
 @endphp
 <!DOCTYPE html>
@@ -35,6 +41,36 @@
     <title>{{ $documentTitle }} • KuloSehat</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <style>
+        @keyframes page-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes page-fade-up {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-enter {
+            animation: page-fade-in 420ms ease-out both;
+        }
+        .page-enter > * {
+            animation: page-fade-up 520ms ease-out both;
+        }
+        .page-enter > *:nth-child(2) { animation-delay: 60ms; }
+        .page-enter > *:nth-child(3) { animation-delay: 120ms; }
+        .page-enter > *:nth-child(4) { animation-delay: 180ms; }
+        .page-enter > *:nth-child(5) { animation-delay: 240ms; }
+        .page-enter > *:nth-child(6) { animation-delay: 300ms; }
+        .page-enter > *:nth-child(7) { animation-delay: 360ms; }
+        .page-enter > *:nth-child(8) { animation-delay: 420ms; }
+        @media (prefers-reduced-motion: reduce) {
+            .page-enter,
+            .page-enter > * {
+                animation: none !important;
+                transform: none !important;
+            }
+        }
+    </style>
 </head>
 <body class="font-sans bg-gradient-to-br from-emerald-50 via-white to-lime-100 text-gray-900">
     <div class="min-h-screen flex">
@@ -91,7 +127,7 @@
                     </form>
                 </div>
             </header>
-            <main class="flex-1 px-6 lg:px-10 py-8 space-y-8">
+            <main class="flex-1 px-6 lg:px-10 py-8 space-y-8 page-enter">
                 @yield('content')
             </main>
         </div>

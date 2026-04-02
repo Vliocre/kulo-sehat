@@ -10,112 +10,184 @@
 @endphp
 
 <header {{ $attributes->merge(['class' => $class]) }}>
-    <div class="max-w-7xl mx-auto bg-white/95 backdrop-blur-sm rounded-[32px] shadow-lg">
+    <div class="max-w-7xl mx-auto bg-white/95 backdrop-blur-sm rounded-[28px] shadow-lg">
         <nav class="px-6 py-4">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                <!-- Kiri: Link Navigasi -->
-                <div class="flex items-center justify-start gap-3 sm:gap-8 flex-wrap text-sm order-2 lg:order-1 flex-1">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+                {{-- ================= LEFT MENU ================= --}}
+                <div class="flex items-center gap-6 flex-wrap text-sm font-medium">
+
                     @auth
-                        <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-green-600 font-medium transition-colors">Beranda</a>
+                        <a href="{{ route('dashboard') }}"
+                           class="hover:text-green-600 {{ request()->routeIs('dashboard') ? 'text-green-600' : 'text-gray-700' }}">
+                            Beranda
+                        </a>
                     @else
-                        <a href="{{ route('home') }}" class="text-gray-700 hover:text-green-600 font-medium transition-colors">Beranda</a>
+                        <a href="{{ route('home') }}"
+                           class="hover:text-green-600 {{ request()->routeIs('home') ? 'text-green-600' : 'text-gray-700' }}">
+                            Beranda
+                        </a>
                     @endauth
 
-                    <!-- Dropdown Kategori -->
-                    <div x-data="{ open: false }" class="relative" @click.away="open = false">
-                        <button @click="open = !open" class="flex items-center text-gray-700 hover:text-green-600 font-medium transition-colors focus:outline-none">
-                            <span>Kategori</span>
-                            <svg class="w-4 h-4 ml-1 transform transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    {{-- ARTIKEL --}}
+                    <a href="{{ route('articles.public.index') }}"
+                       class="hover:text-green-600 {{ request()->routeIs('articles.public.*') ? 'text-green-600' : 'text-gray-700' }}">
+                        Artikel
+                    </a>
+
+                     <a href="{{ route('kalkulator.public.index') }}"
+                       class="hover:text-green-600 {{ request()->routeIs('kalkulator.public.*') ? 'text-green-600' : 'text-gray-700' }}">
+                        Kalkulator
+                    </a>
+
+                    {{-- KELUHAN USER --}}
+                    @auth
+                        @if(!Auth::user()->isDokter() && !Auth::user()->isAdmin())
+                            <a href="{{ route('keluhan.index') }}"
+                               class="hover:text-green-600 {{ request()->routeIs('keluhan.*') ? 'text-green-600' : 'text-gray-700' }}">
+                                Keluhan
+                            </a>
+                        @endif
+                    @endauth
+
+                    {{-- KELUHAN DOKTER --}}
+                    @auth
+                        @if(Auth::user()->role === 'dokter')
+                            <a href="{{ route('dokter.keluhan') }}"
+                               class="hover:text-green-600 {{ request()->routeIs('dokter.keluhan') ? 'text-green-600' : 'text-gray-700' }}">
+                                Keluhan Pasien
+                            </a>
+                        @endif
+                    @endauth
+
+                    {{-- DROPDOWN KATEGORI --}}
+                    <div x-data="{ open: false }" class="relative" @click.away="open=false">
+                        <button @click="open=!open"
+                            class="flex items-center gap-1 text-gray-700 hover:text-green-600">
+                            Kategori
+                            <svg class="w-4 h-4 transition"
+                                 :class="{'rotate-180': open}"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </button>
 
-                        <div x-cloak
-                             x-show="open"
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 transform -translate-y-2"
-                             x-transition:enter-end="opacity-100 transform translate-y-0"
-                             x-transition:leave="transition ease-in duration-150"
-                             x-transition:leave-start="opacity-100 transform translate-y-0"
-                             x-transition:leave-end="opacity-0 transform -translate-y-2"
+                        <div x-show="open" x-cloak
                              class="absolute mt-3 w-48 bg-white rounded-xl shadow-xl py-2">
-
-                            @forelse ($categoryItems as $category)
+                            @if ($categoryItems->isNotEmpty())
+                                @foreach ($categoryItems as $category)
+                                    @php $isActive = $activeCategorySlug === $category->slug; @endphp
+                                    <a href="{{ route('categories.show', $category->slug) }}"
+                                       class="block px-4 py-2 rounded-lg text-sm
+                                       {{ $isActive ? 'bg-green-50 text-green-600' : 'hover:bg-green-50 text-gray-700' }}">
+                                        {{ $category->name }}
+                                    </a>
+                                @endforeach
+                            @else
                                 @php
-                                    $isActive = $activeCategorySlug === $category->slug;
+                                    $staticCategories = [
+                                        ['label' => 'Bayi', 'slug' => 'bayi'],
+                                        ['label' => 'Remaja', 'slug' => 'remaja'],
+                                        ['label' => 'Dewasa', 'slug' => 'dewasa'],
+                                        ['label' => 'Lansia', 'slug' => 'lansia'],
+                                    ];
                                 @endphp
-                                <a href="{{ route('categories.show', $category->slug) }}"
-                                   class="block px-4 py-2 text-sm transition-colors rounded-lg {{ $isActive ? 'text-green-600 bg-green-50' : 'text-gray-700 hover:bg-green-50' }}">
-                                    {{ $category->name }}
-                                </a>
-                            @empty
-                                <span class="block px-4 py-2 text-sm text-gray-500">Belum ada kategori</span>
-                            @endforelse
+                                @foreach ($staticCategories as $category)
+                                    <a href="{{ route('categories.show', $category['slug']) }}"
+                                       class="block px-4 py-2 rounded-lg text-sm hover:bg-green-50 text-gray-700">
+                                        {{ $category['label'] }}
+                                    </a>
+                                @endforeach
+                            @endif
                         </div>
                     </div>
 
-                    <a href="{{ route('articles.public.index') }}" class="text-gray-700 hover:text-green-600 font-medium transition-colors">Artikel</a>
                 </div>
 
-                <!-- Brand di Tengah -->
-                <div class="order-1 lg:order-2 flex justify-center flex-1">
-                    <a href="{{ route('home') }}" class="text-xl font-bold text-center">
-                        <span class="text-green-600">Kulo</span><span class="text-gray-900">Sehat.</span>
+                {{-- ================= BRAND ================= --}}
+                <div class="text-center">
+                    <a href="{{ route('home') }}"
+                       class="text-xl font-bold">
+                        <span class="text-green-600">Kulo</span>
+                        <span class="text-gray-900">Sehat.</span>
                     </a>
                 </div>
 
-                <!-- Kanan: Search + User/Login -->
-                <div class="order-3 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 w-full lg:w-auto flex-1">
+                {{-- ================= RIGHT ================= --}}
+                <div class="flex items-center gap-3 w-full lg:w-auto">
+
+                    {{-- SEARCH --}}
                     @if ($showSearch)
-                        <form action="{{ route('articles.public.index') }}" method="GET" class="w-full sm:w-auto flex-1">
-                            <label class="sr-only" for="search">Cari Artikel</label>
-                            <div class="flex items-center rounded-full border border-gray-200 bg-white px-3 py-1.5 focus-within:border-green-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"/>
+                        <form action="{{ route('articles.public.index') }}"
+                              method="GET"
+                              class="flex-1">
+                            <div class="flex items-center rounded-full border px-3 py-1.5">
+                                <svg class="w-4 h-4 text-gray-400"
+                                     fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="2"
+                                          d="M21 21l-4-4m0 0A7 7 0 1010 17a7 7 0 007-7z"/>
                                 </svg>
-                                <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Cari artikel..." class="w-full bg-transparent border-0 focus:ring-0 text-sm text-gray-700 placeholder-gray-400 ms-2" />
+                                <input type="text"
+                                       name="search"
+                                       value="{{ request('search') }}"
+                                       placeholder="Cari artikel..."
+                                       class="w-full border-0 focus:ring-0 text-sm ms-2">
                             </div>
                         </form>
-                    @else
-                        <div class="flex-1 hidden lg:block"></div>
                     @endif
 
+                    {{-- USER MENU --}}
                     @auth
-                        <div x-data="{ open: false }" class="relative" @click.away="open = false">
-                            <button @click="open = !open" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-4 h-10 min-w-[96px] text-sm font-semibold text-gray-700 hover:border-green-300 hover:text-green-600 transition focus:outline-none">
-                                <span class="max-w-[140px] truncate">{{ Auth::user()->name }}</span>
-                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        <div x-data="{ open:false }" class="relative" @click.away="open=false">
+
+                            <button @click="open=!open"
+                                class="border px-4 h-10 rounded-full text-sm font-semibold hover:border-green-300 hover:text-green-600">
+                                {{ Auth::user()->name }}
                             </button>
-                            <div x-cloak
-                                 x-show="open"
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
-                                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                 x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                                 x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl shadow-gray-500/10 py-1 origin-top">
-                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
-                                @if (Auth::user()->role === 'dokter')
-                                    <a href="{{ route('doctor.articles.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kelola Artikel</a>
+
+                            <div x-show="open" x-cloak
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1">
+
+                                <a href="{{ route('profile.edit') }}"
+                                   class="block px-4 py-2 hover:bg-gray-100">
+                                    Profil
+                                </a>
+
+                                @if(Auth::user()->role === 'dokter')
+                                    <a href="{{ route('doctor.articles.index') }}"
+                                       class="block px-4 py-2 hover:bg-gray-100">
+                                        Kelola Artikel
+                                    </a>
                                 @endif
+
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        Log Out
-                                    </a>
+                                    <button class="w-full text-left px-4 py-2 hover:bg-gray-100">
+                                        Logout
+                                    </button>
                                 </form>
+
                             </div>
                         </div>
+
                     @else
-                        <div class="flex items-center gap-2 flex-wrap justify-center lg:justify-end w-full">
-                            <a href="{{ route('login') }}" class="inline-flex items-center justify-center h-10 min-w-[96px] px-4 text-sm font-semibold text-gray-700 rounded-full border border-gray-200 hover:border-green-300 hover:text-green-600 transition">
-                                Login
-                            </a>
-                            <a href="{{ route('register') }}" class="inline-flex items-center justify-center h-10 min-w-[96px] px-4 text-sm font-semibold text-white bg-green-500 rounded-full hover:bg-green-600 transition w-full sm:w-auto text-center">
-                                Daftar
-                            </a>
-                        </div>
+                        <a href="{{ route('login') }}"
+                           class="px-4 h-10 flex items-center border rounded-full text-sm hover:border-green-300 hover:text-green-600">
+                            Login
+                        </a>
+
+                        <a href="{{ route('register') }}"
+                           class="px-4 h-10 flex items-center bg-green-500 text-white rounded-full hover:bg-green-600 text-sm">
+                            Daftar
+                        </a>
                     @endauth
+
                 </div>
+
             </div>
         </nav>
     </div>

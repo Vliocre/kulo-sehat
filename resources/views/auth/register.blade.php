@@ -75,16 +75,17 @@
                     </label>
 
                     <div class="flex gap-6">
-                        <label class="flex items-center gap-2">
-                            <input type="radio" name="role" value="user" checked>
-                            <span>User</span>
-                        </label>
+    <label class="flex items-center gap-2">
+        <input type="radio" name="role" value="pengguna" checked>
+        <span>Pengguna</span>
+    </label>
 
-                        <label class="flex items-center gap-2">
-                            <input type="radio" name="role" value="dokter">
-                            <span>Dokter</span>
-                        </label>
-                    </div>
+    <label class="flex items-center gap-2">
+        <input type="radio" name="role" value="dokter">
+        <span>Dokter</span>
+    </label>
+</div>
+
 
                     <x-input-error :messages="$errors->get('role')" class="mt-2"/>
                 </div>

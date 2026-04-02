@@ -80,4 +80,10 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+    
+    public function keluhans()
+{
+    return $this->hasMany(Keluhan::class);
+}
+
 }

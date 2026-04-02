@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\TopicGuideController as AdminTopicGuideController;
+use App\Http\Controllers\KalkulatorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,7 @@ use App\Http\Controllers\Admin\TopicGuideController as AdminTopicGuideController
 
 // RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/kalkulator', [KalkulatorController::class, 'index'])->name('kalkulator.public.index');
 Route::get('/artikel', [ArticleController::class, 'index'])->middleware('auth')->name('articles.public.index');
 Route::get('/artikel/{article:slug}', [ArticleController::class, 'show'])->middleware('auth')->name('articles.public.show');
 Route::get('/kategori/{slug}', [CategoryLandingController::class, 'show'])->middleware('auth')->name('categories.show');
@@ -64,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/kalkulator', [KalkulatorController::class, 'calculate'])->name('kalkulator');
 });
 
 
@@ -98,3 +101,56 @@ Route::middleware(['auth', 'verified', 'role:admin'])
 
 // Memuat route bawaan Breeze
 require __DIR__.'/auth.php';
+
+// keluhan
+use App\Http\Controllers\KeluhanController;
+
+Route::middleware('auth')->group(function(){
+
+    // USER
+    Route::get('/keluhan', 
+        [KeluhanController::class,'indexUser'])
+        ->name('keluhan.index');
+
+    Route::post('/keluhan', 
+        [KeluhanController::class,'store'])
+        ->name('keluhan.store');
+
+    Route::delete('/keluhan/{keluhan}',
+        [KeluhanController::class, 'destroy'])
+        ->name('keluhan.destroy');
+});
+
+// DOKTER
+Route::middleware(['auth', 'role:dokter'])->group(function () {
+    Route::get('/dokter/keluhan',
+        [KeluhanController::class, 'indexDokter'])
+        ->name('dokter.keluhan');
+
+    Route::post('/dokter/keluhan/{keluhan}',
+        [KeluhanController::class, 'jawab'])
+        ->name('dokter.keluhan.jawab');
+});
+
+// ADMIN
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/keluhan',
+        [KeluhanController::class, 'indexAdmin'])
+        ->name('admin.keluhan');
+
+    Route::get('/admin/keluhan/{keluhan}',
+        [KeluhanController::class, 'showAdmin'])
+        ->name('admin.keluhan.show');
+
+    Route::get('/admin/keluhan/{keluhan}/edit',
+        [KeluhanController::class, 'editAdmin'])
+        ->name('admin.keluhan.edit');
+
+    Route::put('/admin/keluhan/{keluhan}',
+        [KeluhanController::class, 'updateAdmin'])
+        ->name('admin.keluhan.update');
+
+    Route::delete('/admin/keluhan/{keluhan}',
+        [KeluhanController::class, 'destroyAdmin'])
+        ->name('admin.keluhan.destroy');
+});

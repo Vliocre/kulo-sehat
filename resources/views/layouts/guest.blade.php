@@ -13,6 +13,36 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <style>
+            @keyframes page-fade-in {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes page-fade-up {
+                from { opacity: 0; transform: translateY(12px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .page-enter {
+                animation: page-fade-in 420ms ease-out both;
+            }
+            .page-enter > * {
+                animation: page-fade-up 520ms ease-out both;
+            }
+            .page-enter > *:nth-child(2) { animation-delay: 60ms; }
+            .page-enter > *:nth-child(3) { animation-delay: 120ms; }
+            .page-enter > *:nth-child(4) { animation-delay: 180ms; }
+            .page-enter > *:nth-child(5) { animation-delay: 240ms; }
+            .page-enter > *:nth-child(6) { animation-delay: 300ms; }
+            .page-enter > *:nth-child(7) { animation-delay: 360ms; }
+            .page-enter > *:nth-child(8) { animation-delay: 420ms; }
+            @media (prefers-reduced-motion: reduce) {
+                .page-enter,
+                .page-enter > * {
+                    animation: none !important;
+                    transform: none !important;
+                }
+            }
+        </style>
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
@@ -22,7 +52,7 @@
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg page-enter">
                 {{ $slot }}
             </div>
         </div>

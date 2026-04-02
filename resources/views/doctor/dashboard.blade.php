@@ -6,7 +6,37 @@
         <title>Panel Dokter - KuloSehat</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <style>[x-cloak]{display:none!important;}</style>
+        <style>
+            [x-cloak]{display:none!important;}
+            @keyframes page-fade-in {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes page-fade-up {
+                from { opacity: 0; transform: translateY(12px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .page-enter {
+                animation: page-fade-in 420ms ease-out both;
+            }
+            .page-enter > * {
+                animation: page-fade-up 520ms ease-out both;
+            }
+            .page-enter > *:nth-child(2) { animation-delay: 60ms; }
+            .page-enter > *:nth-child(3) { animation-delay: 120ms; }
+            .page-enter > *:nth-child(4) { animation-delay: 180ms; }
+            .page-enter > *:nth-child(5) { animation-delay: 240ms; }
+            .page-enter > *:nth-child(6) { animation-delay: 300ms; }
+            .page-enter > *:nth-child(7) { animation-delay: 360ms; }
+            .page-enter > *:nth-child(8) { animation-delay: 420ms; }
+            @media (prefers-reduced-motion: reduce) {
+                .page-enter,
+                .page-enter > * {
+                    animation: none !important;
+                    transform: none !important;
+                }
+            }
+        </style>
     </head>
     <body class="font-sans antialiased bg-slate-50 min-h-screen relative">
 
@@ -55,7 +85,7 @@
 @endphp
 
 
-        <main class="relative overflow-hidden">
+        <main class="relative overflow-hidden page-enter">
             <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(74,222,128,0.12),transparent_30%),radial-gradient(circle_at_50%_70%,rgba(52,211,153,0.12),transparent_35%)]"></div>
 
             {{-- Hero --}}

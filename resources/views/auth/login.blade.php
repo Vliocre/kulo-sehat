@@ -75,9 +75,9 @@
                                     <label class="inline-flex items-center">
                                         <input type="radio"
                                                name="role"
-                                               value="user"
+                                               value="pengguna"
                                                class="text-emerald-600 focus:ring-emerald-500"
-                                               checked>
+                                               {{ old('role', 'pengguna') === 'pengguna' ? 'checked' : '' }}>
                                         <span class="ml-2 text-sm text-gray-700">User</span>
                                     </label>
 
@@ -85,10 +85,12 @@
                                         <input type="radio"
                                                name="role"
                                                value="dokter"
-                                               class="text-emerald-600 focus:ring-emerald-500">
+                                               class="text-emerald-600 focus:ring-emerald-500"
+                                               {{ old('role') === 'dokter' ? 'checked' : '' }}>
                                         <span class="ml-2 text-sm text-gray-700">Dokter</span>
                                     </label>
                                 </div>
+                                <x-input-error :messages="$errors->get('role')" class="mt-2" />
                             </div>
 
                             <!-- Remember Me -->
