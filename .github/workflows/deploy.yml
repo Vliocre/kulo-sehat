@@ -35,7 +35,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Run PHPUnit tests
-        run: php artisan test || true
+        run: php artisan test
 
   # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
   build-and-push:
