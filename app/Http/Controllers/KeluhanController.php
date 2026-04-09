@@ -82,8 +82,76 @@ class KeluhanController extends Controller
 
     public function indexAdmin()
     {
-        $keluhans = Keluhan::with('user')->latest()->get();
+        $query = Keluhan::with('user')->latest();
 
-        return view('admin.keluhan', compact('keluhans'));
+        $keluhans = (clone $query)->paginate(10);
+        $totalKeluhan = Keluhan::count();
+        $menunggu = Keluhan::where('status', 'menunggu')->count();
+        $dijawab = Keluhan::where('status', 'dijawab')->count();
+
+        return view('admin.keluhan', compact('keluhans', 'totalKeluhan', 'menunggu', 'dijawab'));
+    }
+
+    public function showAdmin(Keluhan $keluhan)
+    {
+        $keluhan->load('user');
+
+        return view('admin.keluhan-show', compact('keluhan'));
+    }
+
+    public function editAdmin(Keluhan $keluhan)
+    {
+        $keluhan->load('user');
+
+        return view('admin.keluhan-edit', compact('keluhan'));
+    }
+
+    public function updateAdmin(Request $r, Keluhan $keluhan)
+    {
+        $data = $r->validate([
+            'judul' => 'required|string|max:255',
+            'isi' => 'required|string',
+            'jawaban' => 'nullable|string',
+            'status' => 'required|in:menunggu,dijawab',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'hapus_gambar' => 'nullable|boolean',
+        ]);
+
+        if ($r->boolean('hapus_gambar') && $keluhan->gambar) {
+            Storage::disk('public')->delete($keluhan->gambar);
+            $data['gambar'] = null;
+        }
+
+        if ($r->hasFile('gambar')) {
+            if ($keluhan->gambar) {
+                Storage::disk('public')->delete($keluhan->gambar);
+            }
+
+            $data['gambar'] = $r->file('gambar')->store('keluhan', 'public');
+        }
+
+        if (blank($data['jawaban'])) {
+            $data['jawaban'] = null;
+            $data['status'] = 'menunggu';
+        }
+
+        $keluhan->update($data);
+
+        return redirect()
+            ->route('admin.keluhan.show', $keluhan)
+            ->with('success', 'Keluhan berhasil diperbarui.');
+    }
+
+    public function destroyAdmin(Keluhan $keluhan)
+    {
+        if ($keluhan->gambar) {
+            Storage::disk('public')->delete($keluhan->gambar);
+        }
+
+        $keluhan->delete();
+
+        return redirect()
+            ->route('admin.keluhan')
+            ->with('success', 'Keluhan berhasil dihapus.');
     }
 }

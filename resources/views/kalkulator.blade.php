@@ -152,6 +152,18 @@
                                 style="width:0%">
                             </div>
                         </div>
+
+                        <div class="mt-5 rounded-2xl bg-slate-50 px-4 py-4 text-left">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Rekomendasi Artikel</p>
+                            <p id="messageText" class="mt-2 text-sm text-slate-600">
+                                Hitung BMI Anda terlebih dahulu untuk melihat rekomendasi artikel yang sesuai.
+                            </p>
+                            <a id="articleCta"
+                               href="{{ route('articles.public.index') }}"
+                               class="mt-4 inline-flex items-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                                Lihat Artikel
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -175,23 +187,36 @@
             let kategori = "";
             let warna = "bg-emerald-500";
             let progress = Math.min((bmi / 40) * 100, 100);
+            let articleSlug = "ideal";
+            let message = "";
 
             if (bmi < 18.5) {
-                kategori = "Berat Badan Rendah";
+                kategori = "Kurus";
                 warna = "bg-sky-400";
+                articleSlug = "kurus";
+                message = "BMI Anda masuk kategori kurus. Baca artikel kategori kurus untuk memahami cara meningkatkan berat badan dan asupan gizi secara sehat.";
             } else if (bmi >= 18.5 && bmi <= 24.9) {
-                kategori = "Normal";
+                kategori = "Ideal";
                 warna = "bg-emerald-500";
+                articleSlug = "ideal";
+                message = "BMI Anda berada di kategori ideal. Baca artikel kategori ideal untuk menjaga pola makan, aktivitas, dan kebiasaan sehat Anda.";
             } else if (bmi >= 25 && bmi <= 29.9) {
-                kategori = "Berat Badan Berlebih";
+                kategori = "Gemuk";
                 warna = "bg-yellow-400";
+                articleSlug = "gemuk";
+                message = "BMI Anda masuk kategori gemuk. Baca artikel kategori gemuk untuk mulai memperbaiki pola makan dan aktivitas fisik secara bertahap.";
             } else {
                 kategori = "Obesitas";
                 warna = "bg-rose-400";
+                articleSlug = "obesitas";
+                message = "BMI Anda masuk kategori obesitas. Baca artikel kategori obesitas untuk memahami risiko kesehatan dan langkah penanganan yang perlu diprioritaskan.";
             }
 
             document.getElementById("bmiValue").innerText = bmi;
             document.getElementById("kategori").innerText = kategori;
+            document.getElementById("messageText").innerText = message;
+            document.getElementById("articleCta").href = "{{ route('articles.public.index') }}" + "?category=" + articleSlug + "&from=kalkulator";
+            document.getElementById("articleCta").innerText = "Baca Artikel " + kategori;
 
             let progressBar = document.getElementById("progressBar");
             progressBar.style.width = progress + "%";

@@ -16,13 +16,18 @@ class ArticleController extends Controller
         $search = $request->query('search');
         $categorySlug = $request->query('category');
         $selectedCategory = null;
+        $bmiCategories = Category::forBmi()
+            ->get()
+            ->sortBy(fn ($category) => array_search($category->slug, Category::bmiSlugs(), true))
+            ->values();
 
         $articlesQuery = Article::where('status', 'published')
             ->with(['author', 'category'])
+            ->whereHas('category', fn ($query) => $query->forBmi())
             ->latest();
 
         if ($categorySlug) {
-            $selectedCategory = Category::where('slug', $categorySlug)->first();
+            $selectedCategory = $bmiCategories->firstWhere('slug', $categorySlug);
 
             if ($selectedCategory) {
                 $articlesQuery->where('category_id', $selectedCategory->id);
@@ -37,8 +42,9 @@ class ArticleController extends Controller
         }
 
         $articles = $articlesQuery->paginate(9)->withQueryString();
+        $fromCalculator = $request->query('from') === 'kalkulator';
 
-        return view('articles.index', compact('articles', 'search', 'selectedCategory'));
+        return view('articles.index', compact('articles', 'search', 'selectedCategory', 'bmiCategories', 'fromCalculator'));
     }
 
     /**
@@ -53,7 +59,10 @@ class ArticleController extends Controller
 
         $recommendedArticles = Article::where('status', 'published')
             ->where('id', '!=', $article->id)
-            ->latest()
+            ->when($article->category_id, function ($query) use ($article) {
+                $query->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$article->category_id]);
+            })
+            ->orderByDesc('created_at')
             ->take(5)
             ->get();
 

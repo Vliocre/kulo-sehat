@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Category;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,9 +23,12 @@ class AppServiceProvider extends ServiceProvider
         View::composer('components.public-navbar', function ($view) {
             $view->with(
                 'categories',
-                Category::query()
-                    ->orderBy('name')
-                    ->get(['id', 'name', 'slug'])
+                collect([
+                    (object) ['name' => 'Bayi', 'slug' => 'bayi'],
+                    (object) ['name' => 'Remaja', 'slug' => 'remaja'],
+                    (object) ['name' => 'Dewasa', 'slug' => 'dewasa'],
+                    (object) ['name' => 'Lansia', 'slug' => 'lansia'],
+                ])
             );
         });
     }
