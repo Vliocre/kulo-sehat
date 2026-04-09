@@ -102,27 +102,21 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 8022
           script: |
+            script: |
             set -e
 
             echo "🚀 Mulai deployment..."
 
-            # Login ke GHCR
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Masuk ke folder project
-            cd /home/${{ secrets.SERVER_USER }}/RPL2X-kelompok-1
-
-            # Pull image terbaru
             docker pull ghcr.io/${{ github.repository }}:latest
 
-            # Update container tanpa downtime besar
-            docker compose up -d --remove-orphans
+            docker stop laravel-app || true
+            docker rm laravel-app || true
 
-            # Tunggu container siap
-            echo "⏳ Menunggu container ready..."
-            sleep 10
-
-            # Jalankan migrasi database
-            docker compose exec -T app php artisan migrate --force --no-interaction
+            docker run -d -p 80:80 \
+              --name laravel-app \
+              -e APP_KEY=${{ secrets.APP_KEY }} \
+              ghcr.io/${{ github.repository }}:latest
 
             echo "✅ Deployment selesai!"
