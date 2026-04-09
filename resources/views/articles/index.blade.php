@@ -11,6 +11,7 @@
         [x-cloak] {
             display: none !important;
         }
+
         .page-bg {
             background-color: #f5faf7;
             background-image:
@@ -29,8 +30,34 @@
             <div class="flex items-center justify-between gap-4">
                 <div>
                     <p class="text-sm uppercase tracking-[0.35em] text-gray-400 font-semibold">Kumpulan Artikel</p>
-                    <h1 class="text-3xl font-bold text-gray-900 mt-2">Temukan Topik Kesehatan Favorit Anda</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 mt-2">Artikel Berdasarkan Kategori BMI</h1>
+                    <p class="mt-3 max-w-3xl text-sm text-gray-600">
+                        Pilih artikel sesuai hasil BMI Anda: kurus, ideal, gemuk, atau obesitas.
+                    </p>
                 </div>
+            </div>
+
+            @if ($fromCalculator && $selectedCategory)
+                <div class="mt-6 rounded-[28px] border border-emerald-100 bg-gradient-to-r from-emerald-50 to-lime-50 px-6 py-5">
+                    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">Rekomendasi Dari Kalkulator BMI</p>
+                    <h2 class="mt-2 text-xl font-bold text-slate-900">Mulai dari artikel kategori {{ $selectedCategory->name }}</h2>
+                    <p class="mt-2 text-sm text-slate-600">
+                        Hasil BMI Anda mengarah ke kategori ini. Baca artikel yang paling relevan untuk kondisi Anda sekarang.
+                    </p>
+                </div>
+            @endif
+
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a href="{{ route('articles.public.index', array_filter(['search' => $search], fn ($value) => !is_null($value) && $value !== '')) }}"
+                   class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition {{ $selectedCategory ? 'bg-white text-gray-700 ring-1 ring-gray-200 hover:ring-emerald-200' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' }}">
+                    Semua
+                </a>
+                @foreach ($bmiCategories as $category)
+                    <a href="{{ route('articles.public.index', array_filter(['category' => $category->slug, 'search' => $search], fn ($value) => !is_null($value) && $value !== '')) }}"
+                       class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition {{ optional($selectedCategory)->id === $category->id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:text-emerald-700 hover:ring-emerald-200' }}">
+                        {{ $category->name }}
+                    </a>
+                @endforeach
             </div>
 
             @if (!empty($search))
@@ -40,7 +67,7 @@
             @endif
 
             @if ($selectedCategory)
-                <div class="mt-2 text-sm text-gray-600 flex items-center gap-2">
+                <div class="mt-2 flex items-center gap-2 text-sm text-gray-600">
                     <span>Filter kategori:</span>
                     <span class="font-semibold text-gray-900">{{ $selectedCategory->name }}</span>
                     <a href="{{ route('articles.public.index', array_filter(['search' => $search], fn ($value) => !is_null($value) && $value !== '')) }}" class="text-green-600 hover:text-green-700 text-xs font-semibold uppercase tracking-wide">Hapus Filter</a>
@@ -65,23 +92,31 @@
                             <p class="mt-3 text-sm text-gray-600 line-clamp-3">
                                 {{ \Illuminate\Support\Str::limit(strip_tags($article->content), 150) }}
                             </p>
+                            @if ($article->category)
+                                <div class="mt-4">
+                                    <a href="{{ route('articles.public.index', ['category' => $article->category->slug]) }}"
+                                       class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
+                                        Kategori {{ $article->category->name }}
+                                    </a>
+                                </div>
+                            @endif
                             <div class="mt-6 flex items-center justify-between text-sm text-gray-500">
                                 <span>{{ $article->created_at->isoFormat('D MMM YYYY') }}</span>
                                 <a href="{{ route('articles.public.show', $article->slug) }}" class="text-green-600 font-semibold hover:text-green-700">
-                                    Baca Selengkapnya →
+                                    Baca Selengkapnya ->
                                 </a>
                             </div>
                         </div>
                     </article>
                 @empty
                     <div class="col-span-full text-center py-20 text-gray-500">
-                        Belum ada artikel yang tersedia.
+                        Belum ada artikel yang tersedia untuk kategori ini.
                     </div>
                 @endforelse
             </div>
 
             <div class="mt-10">
-                {{ $articles->appends(request()->only('search', 'category'))->links() }}
+                {{ $articles->appends(request()->only('search', 'category', 'from'))->links() }}
             </div>
         </div>
     </main>

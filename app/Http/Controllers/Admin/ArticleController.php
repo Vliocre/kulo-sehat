@@ -27,7 +27,7 @@ class ArticleController extends Controller
      */
     public function create()
     {
-        $categories = Category::all(); // Ambil semua kategori untuk dropdown
+        $categories = Category::forBmi()->get()->sortBy(fn ($category) => array_search($category->slug, Category::bmiSlugs(), true))->values();
         return view('admin.articles.create', compact('categories'));
     }
 
@@ -68,7 +68,7 @@ class ArticleController extends Controller
      */
     public function edit(Article $article)
     {
-        $categories = Category::all();
+        $categories = Category::forBmi()->get()->sortBy(fn ($category) => array_search($category->slug, Category::bmiSlugs(), true))->values();
         return view('admin.articles.edit', compact('article', 'categories'));
     }
 
