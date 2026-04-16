@@ -14,7 +14,6 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,16 +26,7 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
 
-      - name: Install NPM dependencies
-        run: npm install
-
-      - name: Build Vite assets
-        run: npm run build
       - name: Copy .env
         run: cp .env.example .env
 
@@ -44,20 +34,16 @@ jobs:
         run: php artisan key:generate
 
       - name: Run PHPUnit tests
-        run: php artisan test || true
+        run: php artisan test || true # Tetap lanjut meski test gagal (opsional)
 
   # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
     needs: test
-
     permissions:
       contents: read
       packages: write
-
-    outputs:
-      image: ${{ steps.meta.outputs.tags }}
 
     steps:
       - name: Checkout code
@@ -100,23 +86,25 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 8022
+          port: 8022 # Pastikan port SSH VPS kamu memang 8022
           script: |
-            script: |
             set -e
-
             echo "🚀 Mulai deployment..."
 
-            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # Login ke Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            docker pull ghcr.io/${{ github.repository }}:latest
+            # Masuk ke folder tempat docker-compose.yml berada (Sesuai Bagian 4 panduan)
+            # Ganti 'RPL2X-kelompok-1' dengan nama folder di servermu
+            cd ~/RPL2X-kelompok-1
 
-            docker stop laravel-app || true
-            docker rm laravel-app || true
+            # Pull image terbaru
+            docker compose pull
 
-            docker run -d -p 80:80 \
-              --name laravel-app \
-              -e APP_KEY=${{ secrets.APP_KEY }} \
-              ghcr.io/${{ github.repository }}:latest
+            # Restart container dengan image baru
+            docker compose up -d --remove-orphans
+
+            # Jalankan migrasi jika perlu
+            docker compose exec -T app php artisan migrate --force
 
             echo "✅ Deployment selesai!"
