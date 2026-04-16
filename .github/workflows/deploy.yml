@@ -99,19 +99,17 @@ jobs:
             # Masuk ke folder project
             cd ~/RPL2D-kelompok-7
 
-            # Pull image terbaru
+            # Pull & recreate container
             docker compose pull
-
-            # Recreate container
             docker compose up -d --remove-orphans
 
             # ================================
-            # WAIT DATABASE READY (FIX UTAMA)
+            # WAIT DATABASE READY (FIX TOTAL)
             # ================================
             echo "⏳ Menunggu database siap..."
 
-            for i in {1..30}; do
-              if docker compose exec -T db mysqladmin ping -h "localhost" --silent; then
+            for i in {1..40}; do
+              if docker compose exec -T db sh -c "mysqladmin ping -h 127.0.0.1 --silent"; then
                 echo "✅ Database siap!"
                 break
               fi
@@ -119,15 +117,22 @@ jobs:
               sleep 2
             done
 
+            # VALIDASI FINAL (WAJIB)
+            if ! docker compose exec -T db sh -c "mysqladmin ping -h 127.0.0.1 --silent"; then
+              echo "❌ Database tidak siap!"
+              docker compose logs db
+              exit 1
+            fi
+
             # ================================
-            # CLEAR CACHE LARAVEL (WAJIB)
+            # CLEAR CACHE
             # ================================
             echo "🧹 Clear cache Laravel..."
             docker compose exec -T app php artisan config:clear
             docker compose exec -T app php artisan cache:clear
 
             # ================================
-            # MIGRATION (DENGAN RETRY)
+            # MIGRATION (RETRY FIX)
             # ================================
             echo "🏃 Menjalankan migrasi..."
 
