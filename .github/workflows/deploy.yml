@@ -10,7 +10,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # ─── JOB 1: TESTING ───────────────────────────────────────
   test:
     name: Run Tests
     runs-on: ubuntu-latest
@@ -22,7 +21,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
           extensions: pdo, pdo_mysql, bcmath
 
       - name: Install Composer dependencies
@@ -37,7 +36,6 @@ jobs:
       - name: Run PHPUnit tests
         run: php artisan test || true
 
-  # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
@@ -75,13 +73,25 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  # ─── JOB 3: DEPLOY KE VPS ────────────────────────────────
   deploy:
     name: Deploy ke VPS
     runs-on: ubuntu-latest
     needs: build-and-push
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload Docker Compose
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 8022
+          source: docker-compose.yml
+          target: ~/RPL2D-kelompok-7
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -91,64 +101,61 @@ jobs:
           port: 8022
           script: |
             set -e
-            echo "🚀 Mulai deployment..."
+            echo "Start deployment..."
 
-            # Login ke GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Masuk ke folder project
             cd ~/RPL2D-kelompok-7
 
-            # Pull & recreate container
+            export APP_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            export COMPOSE_PROJECT_NAME=kelompok7
+
+            echo "Pull latest images..."
             docker compose pull
-            docker compose up -d --remove-orphans
 
-            # ================================
-            # WAIT DATABASE READY (FIX TOTAL)
-            # ================================
-            echo "⏳ Menunggu database siap..."
+            echo "Stop previous stack..."
+            docker compose down --remove-orphans || true
 
-            for i in {1..40}; do
+            echo "Remove legacy app container if it still exists..."
+            docker ps -aq --filter "name=_kelompok7_app$" | xargs -r docker rm -f
+
+            echo "Start database..."
+            docker compose up -d db
+
+            echo "Wait for database..."
+            for i in $(seq 1 40); do
               if docker compose exec -T db sh -c "mysqladmin ping -h 127.0.0.1 --silent"; then
-                echo "✅ Database siap!"
+                echo "Database ready."
                 break
               fi
-              echo "⏳ masih menunggu DB..."
+              echo "Still waiting for DB..."
               sleep 2
             done
 
-            # VALIDASI FINAL (WAJIB)
             if ! docker compose exec -T db sh -c "mysqladmin ping -h 127.0.0.1 --silent"; then
-              echo "❌ Database tidak siap!"
+              echo "Database is not ready."
               docker compose logs db
               exit 1
             fi
 
-            # ================================
-            # CLEAR CACHE
-            # ================================
-            echo "🧹 Clear cache Laravel..."
+            echo "Start application..."
+            docker compose up -d app
+
+            echo "Clear Laravel cache..."
             docker compose exec -T app php artisan config:clear
             docker compose exec -T app php artisan cache:clear
 
-            # ================================
-            # MIGRATION (RETRY FIX)
-            # ================================
-            echo "🏃 Menjalankan migrasi..."
-
-            for i in {1..5}; do
+            echo "Run migrations..."
+            for i in $(seq 1 5); do
               if docker compose exec -T app php artisan migrate --force; then
-                echo "✅ Migrasi berhasil!"
+                echo "Migration completed."
                 break
               fi
-              echo "❌ Migrasi gagal, retry..."
+              echo "Migration failed, retrying..."
               sleep 5
             done
 
-            # ================================
-            # OPTIMIZE
-            # ================================
             docker compose exec -T app php artisan config:cache
             docker compose exec -T app php artisan route:cache
 
-            echo "✅ Deployment selesai!"
+            echo "Deployment finished."
