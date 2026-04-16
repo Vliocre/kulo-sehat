@@ -96,7 +96,7 @@ jobs:
 
             # Masuk ke folder tempat docker-compose.yml berada (Sesuai Bagian 4 panduan)
             # Ganti 'RPL2X-kelompok-1' dengan nama folder di servermu
-            cd ~/RPL2X-kelompok-1
+            cd ~/RPL2D-kelompok-7
 
             # Pull image terbaru
             docker compose pull
