@@ -2,7 +2,7 @@ name: kelompok7
 
 services:
   app:
-    image: ${APP_IMAGE:-ghcr.io/arizalassyafiq-arch/rpl2d-kelompok-7:latest}
+    image: ${APP_IMAGE:-ghcr.io/vliocre/kulo-sehat:latest}
     build:
       context: .
     restart: unless-stopped
