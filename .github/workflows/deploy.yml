@@ -34,7 +34,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Run PHPUnit tests
-        run: php artisan test || true # Tetap lanjut meski test gagal (opsional)
+        run: php artisan test || true
 
   # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
   build-and-push:
@@ -86,7 +86,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 8022 # Pastikan port SSH VPS kamu memang 8022
+          port: 8022
           script: |
             set -e
             echo "🚀 Mulai deployment..."
@@ -94,17 +94,25 @@ jobs:
             # Login ke Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Masuk ke folder tempat docker-compose.yml berada (Sesuai Bagian 4 panduan)
-            # Ganti 'RPL2X-kelompok-1' dengan nama folder di servermu
+            # Masuk ke folder project
             cd ~/RPL2D-kelompok-7
 
             # Pull image terbaru
             docker compose pull
 
-            # Restart container dengan image baru
+            # Update container (Recreate)
             docker compose up -d --remove-orphans
 
-            # Jalankan migrasi jika perlu
+            # TUNGGU DATABASE SIAP (Penting agar tidak Connection Refused)
+            echo "⏳ Menunggu database siap (20 detik)..."
+            sleep 20
+
+            # Jalankan migrasi database
+            echo "🏃 Menjalankan migrasi..."
             docker compose exec -T app php artisan migrate --force
+
+            # Optimasi cache (Opsional)
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
 
             echo "✅ Deployment selesai!"
