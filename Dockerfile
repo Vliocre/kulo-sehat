@@ -23,7 +23,15 @@ RUN docker-php-ext-install \
     gd \
     opcache \
     zip
+# install node (kalau belum ada)
+RUN apt-get update && apt-get install -y nodejs npm
 
+# copy project
+COPY . .
+
+# install & build frontend
+RUN npm install
+RUN npm run build
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
