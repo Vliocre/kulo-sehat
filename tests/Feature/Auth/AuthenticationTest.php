@@ -23,6 +23,34 @@ test('users can authenticate using the login screen', function () {
     $response->assertRedirect(route('dashboard', absolute: false));
 });
 
+test('guests can open the bmi calculator page', function () {
+    $response = $this->get(route('kalkulator.public.index'));
+
+    $response->assertOk();
+});
+
+test('users are redirected to their intended article page after login', function () {
+    $user = User::factory()->create([
+        'role' => 'pengguna',
+    ]);
+
+    $intendedUrl = route('articles.public.index', [
+        'category' => 'ideal',
+        'from' => 'kalkulator',
+    ], false);
+
+    $response = $this->withSession([
+        'url.intended' => $intendedUrl,
+    ])->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+        'role' => 'pengguna',
+    ]);
+
+    $this->assertAuthenticated();
+    $response->assertRedirect($intendedUrl);
+});
+
 test('admins can authenticate without selecting a role', function () {
     $admin = User::factory()->create([
         'role' => 'admin',

@@ -30,6 +30,16 @@ class CheckRole
         foreach ($roles as $role) {
             // 4. Periksa apakah role pengguna SAMA DENGAN salah satu role yang diizinkan.
             if ($user->role == $role) {
+                if ($role === 'dokter' && ! $user->canAccessDoctorArea()) {
+                    Auth::guard('web')->logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return redirect()
+                        ->route('login')
+                        ->withErrors(['role' => 'Akun dokter Anda belum disetujui admin.']);
+                }
+
                 // 5. Jika cocok, IZINKAN pengguna untuk melanjutkan.
                 return $next($request);
             }

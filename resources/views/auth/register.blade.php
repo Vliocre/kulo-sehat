@@ -39,7 +39,7 @@
 
                 <!-- NAME -->
                 <div>
-                    <input type="text" name="name" required autofocus
+                    <input type="text" name="name" value="{{ old('name') }}" required autofocus
                            placeholder="Nama Lengkap"
                            class="w-full border-gray-300 rounded-full px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500">
                     <x-input-error :messages="$errors->get('name')" class="mt-2"/>
@@ -47,7 +47,7 @@
 
                 <!-- EMAIL -->
                 <div class="mt-4">
-                    <input type="email" name="email" required
+                    <input type="email" name="email" value="{{ old('email') }}" required
                            placeholder="Alamat Email"
                            class="w-full border-gray-300 rounded-full px-4 py-3 focus:border-emerald-500 focus:ring-emerald-500">
                     <x-input-error :messages="$errors->get('email')" class="mt-2"/>
@@ -76,16 +76,19 @@
 
                     <div class="flex gap-6">
     <label class="flex items-center gap-2">
-        <input type="radio" name="role" value="pengguna" checked>
+        <input type="radio" name="role" value="pengguna" {{ old('role', 'pengguna') === 'pengguna' ? 'checked' : '' }}>
         <span>Pengguna</span>
     </label>
 
     <label class="flex items-center gap-2">
-        <input type="radio" name="role" value="dokter">
+        <input type="radio" name="role" value="dokter" {{ old('role') === 'dokter' ? 'checked' : '' }}>
         <span>Dokter</span>
     </label>
 </div>
 
+                    <p class="mt-2 text-xs text-gray-500">
+                        Jika memilih dokter, setelah klik register Anda akan diminta mengisi Nomor IDI dan mengunggah STR serta SIP untuk verifikasi admin.
+                    </p>
 
                     <x-input-error :messages="$errors->get('role')" class="mt-2"/>
                 </div>

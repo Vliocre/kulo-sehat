@@ -6,15 +6,21 @@
 
 @section('content')
     <div class="flex flex-col gap-6">
+        @if (session('success'))
+            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h2 class="text-lg font-semibold text-gray-900">Daftar Pengguna Aktif</h2>
-                <p class="text-sm text-gray-500">Kelola izin dan peran pengguna dengan mudah.</p>
+                <p class="text-sm text-gray-500">Kelola izin, peran, dan persetujuan akun dokter.</p>
+                <p class="mt-2 text-sm text-amber-700">Dokter menunggu persetujuan: {{ $pendingDoctorCount }}</p>
             </div>
-            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-                Tambah Pengguna Baru
-            </a>
+            <div class="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800">
+                Fokus utama: tinjau dokter yang pending
+            </div>
         </div>
 
         <div class="rounded-3xl bg-white shadow-lg border border-gray-100 overflow-hidden">
@@ -28,6 +34,8 @@
                             <th class="px-5 py-3 text-left">Tinggi</th>
                             <th class="px-5 py-3 text-left">Berat</th>
                             <th class="px-5 py-3 text-left">Peran</th>
+                            <th class="px-5 py-3 text-left">Verifikasi Dokter</th>
+                            <th class="px-5 py-3 text-left">Dokumen</th>
                             <th class="px-5 py-3 text-left">Bergabung</th>
                             <th class="px-5 py-3 text-center">Aksi</th>
                         </tr>
@@ -49,14 +57,61 @@
                                         ])
                                     ">{{ ucfirst($user->role) }}</span>
                                 </td>
+                                <td class="px-5 py-4">
+                                    @php
+                                        $doctorStatus = [
+                                            'not_required' => 'Tidak perlu',
+                                            'pending' => 'Menunggu',
+                                            'approved' => 'Disetujui',
+                                            'rejected' => 'Ditolak',
+                                        ][$user->doctor_verification_status ?? 'not_required'];
+                                    @endphp
+                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                                        @class([
+                                            'bg-gray-100 text-gray-600' => ($user->doctor_verification_status ?? 'not_required') === 'not_required',
+                                            'bg-amber-100 text-amber-700' => $user->doctor_verification_status === 'pending',
+                                            'bg-emerald-100 text-emerald-700' => $user->doctor_verification_status === 'approved',
+                                            'bg-red-100 text-red-700' => $user->doctor_verification_status === 'rejected',
+                                        ])
+                                    ">{{ $doctorStatus }}</span>
+                                </td>
+                                <td class="px-5 py-4 text-gray-600">
+                                    @if ($user->role === 'dokter')
+                                        <div class="flex flex-col gap-2">
+                                            <span class="text-xs text-gray-500">IDI: {{ $user->doctor_idi_number ?: '-' }}</span>
+                                            @if ($user->doctor_str_file)
+                                                <a href="{{ asset('storage/' . $user->doctor_str_file) }}" target="_blank" class="text-emerald-600 hover:text-emerald-800">Lihat STR</a>
+                                            @endif
+                                            @if ($user->doctor_sip_file)
+                                                <a href="{{ asset('storage/' . $user->doctor_sip_file) }}" target="_blank" class="text-emerald-600 hover:text-emerald-800">Lihat SIP</a>
+                                            @endif
+                                        </div>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="px-5 py-4 text-gray-500">{{ $user->created_at->format('d M Y') }}</td>
                                 <td class="px-5 py-4 text-center">
-                                    <a href="{{ route('admin.users.edit', $user->id) }}" class="text-emerald-600 hover:text-emerald-800 font-semibold">Edit</a>
+                                    <div class="flex flex-col items-center gap-2">
+                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="text-emerald-600 hover:text-emerald-800 font-semibold">Edit</a>
+                                        @if ($user->role === 'dokter' && $user->doctor_verification_status !== 'approved')
+                                            <form action="{{ route('admin.users.approve-doctor', $user->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="text-xs font-semibold text-emerald-700 hover:text-emerald-900">Setujui</button>
+                                            </form>
+                                        @endif
+                                        @if ($user->role === 'dokter' && $user->doctor_verification_status !== 'rejected')
+                                            <form action="{{ route('admin.users.reject-doctor', $user->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="text-xs font-semibold text-red-600 hover:text-red-800">Tolak</button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-5 py-6 text-center text-gray-500">Tidak ada data pengguna ditemukan.</td>
+                                <td colspan="10" class="px-5 py-6 text-center text-gray-500">Tidak ada data pengguna ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>

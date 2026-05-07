@@ -6,6 +6,12 @@
     <title>Dashboard - KuloSehat</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    >
     <style>
         [x-cloak]{display:none!important;}
         .no-scrollbar::-webkit-scrollbar{display:none;}
@@ -44,6 +50,134 @@
                 radial-gradient(18% 24% at 15% 18%, rgba(52, 211, 153, 0.08), transparent 50%),
                 radial-gradient(22% 26% at 82% 10%, rgba(34, 197, 94, 0.07), transparent 48%),
                 linear-gradient(135deg, #f9fdfb 0%, #edf6f1 45%, #e9f3ef 100%);
+        }
+        .hospital-map {
+            height: 500px;
+            min-height: 420px;
+            width: 100%;
+        }
+        .hospital-map-shell {
+            background:
+                radial-gradient(circle at top left, rgba(16, 185, 129, 0.16), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(45, 212, 191, 0.14), transparent 24%),
+                linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 118, 110, 0.94));
+        }
+        .hospital-map__status[data-tone="loading"] {
+            background-color: rgba(16, 185, 129, 0.16);
+            color: rgb(167 243 208);
+        }
+        .hospital-map__status[data-tone="success"] {
+            background-color: rgba(59, 130, 246, 0.18);
+            color: rgb(191 219 254);
+        }
+        .hospital-map__status[data-tone="error"] {
+            background-color: rgba(248, 113, 113, 0.18);
+            color: rgb(254 202 202);
+        }
+        .hospital-map__list-item {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+        }
+        .hospital-map__list-item:hover,
+        .hospital-map__list-item:focus-visible {
+            transform: translateY(-2px);
+            border-color: rgba(52, 211, 153, 0.45);
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .hospital-map__list-item.is-active {
+            border-color: rgba(52, 211, 153, 0.8);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(59, 130, 246, 0.12));
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+        }
+        .hospital-map__skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.16), rgba(255,255,255,0.08));
+            background-size: 220% 100%;
+            animation: shimmer 1.6s linear infinite;
+        }
+        .hospital-map__panel {
+            backdrop-filter: blur(18px);
+            background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+        }
+        .leaflet-container {
+            font-family: inherit;
+            background: #d9f6ee;
+        }
+        .leaflet-popup-content-wrapper {
+            border-radius: 18px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+        }
+        .leaflet-popup-content {
+            margin: 14px 16px;
+            min-width: 220px;
+        }
+        .hospital-popup__link {
+            color: rgb(5 150 105);
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .hospital-popup__link:hover {
+            text-decoration: underline;
+        }
+        .hospital-marker,
+        .user-marker {
+            background: transparent;
+            border: 0;
+        }
+        .hospital-marker__pin {
+            position: relative;
+            width: 22px;
+            height: 22px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #34d399, #0f766e);
+            border: 3px solid rgba(255, 255, 255, 0.96);
+            box-shadow: 0 10px 24px rgba(15, 118, 110, 0.38);
+        }
+        .hospital-marker__pin::after {
+            content: "";
+            position: absolute;
+            inset: -8px;
+            border-radius: 9999px;
+            border: 1px solid rgba(52, 211, 153, 0.45);
+            animation: hospitalPing 2.4s ease-out infinite;
+        }
+        .user-marker__pin {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            border-radius: 9999px;
+            background: #2563eb;
+            border: 3px solid rgba(255, 255, 255, 0.96);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+        }
+        .user-marker__pin::after {
+            content: "";
+            position: absolute;
+            inset: -10px;
+            border-radius: 9999px;
+            background: rgba(59, 130, 246, 0.16);
+            animation: userPulse 2s ease-out infinite;
+        }
+        @keyframes hospitalPing {
+            0% { opacity: 0.9; transform: scale(0.8); }
+            80% { opacity: 0; transform: scale(1.65); }
+            100% { opacity: 0; transform: scale(1.65); }
+        }
+        @keyframes userPulse {
+            0% { opacity: 0.9; transform: scale(0.75); }
+            100% { opacity: 0; transform: scale(1.9); }
+        }
+        @keyframes shimmer {
+            from { background-position: 200% 0; }
+            to { background-position: -20% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .hospital-map__skeleton,
+            .hospital-marker__pin::after,
+            .user-marker__pin::after {
+                animation: none !important;
+            }
         }
     </style>
 </head>
@@ -109,6 +243,89 @@
                                     Lihat Panduan
                                 </a>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-2">
+            <div class="hospital-map-shell relative overflow-hidden rounded-[34px] p-6 lg:p-8 text-white shadow-[0_28px_80px_rgba(15,23,42,0.2)]">
+                <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.12),transparent_24%),radial-gradient(circle_at_82%_12%,rgba(56,189,248,0.14),transparent_22%)]"></div>
+                <div class="relative">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                        <div class="max-w-2xl">
+                            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-200">Peta Layanan Terdekat</p>
+                            <h2 class="mt-3 text-3xl font-bold leading-tight text-white">Temukan rumah sakit di sekitar Anda secara real-time</h2>
+                            <p class="mt-3 text-sm text-emerald-50/90 lg:text-base">
+                                Peta ini bisa digeser, diperbesar, dan dijelajahi. Kami akan memakai lokasi Anda untuk menampilkan rumah sakit terdekat dan rute tercepat saat dibutuhkan.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span data-map-status data-tone="loading" class="hospital-map__status inline-flex items-center rounded-full px-4 py-2 text-xs font-semibold tracking-wide">
+                                Menyiapkan peta layanan terdekat...
+                            </span>
+                            <button
+                                type="button"
+                                data-map-refresh
+                                class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-emerald-800 shadow-lg shadow-slate-900/10 transition hover:bg-emerald-50"
+                            >
+                                Gunakan lokasi saya
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+                        <div class="space-y-4">
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="hospital-map__panel rounded-[24px] p-4 ring-1 ring-white/10">
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">Lokasi Aktif</p>
+                                    <p data-map-location class="mt-2 text-lg font-semibold text-white">Mendeteksi lokasi...</p>
+                                    <p class="mt-1 text-xs text-emerald-50/75">Fallback otomatis ke Jakarta jika izin lokasi tidak tersedia.</p>
+                                </div>
+                                <div class="hospital-map__panel rounded-[24px] p-4 ring-1 ring-white/10">
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">Rumah Sakit</p>
+                                    <p data-map-count class="mt-2 text-lg font-semibold text-white">0 lokasi</p>
+                                    <p class="mt-1 text-xs text-emerald-50/75">Daftar lokasi disusun dari titik lokasi aktif Anda.</p>
+                                </div>
+                                <div class="hospital-map__panel rounded-[24px] p-4 ring-1 ring-white/10">
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">Terdekat</p>
+                                    <p data-map-nearest class="mt-2 text-lg font-semibold text-white">Belum tersedia</p>
+                                    <p class="mt-1 text-xs text-emerald-50/75">Klik kartu lokasi untuk fokus ke marker.</p>
+                                </div>
+                            </div>
+
+                            <div class="hospital-map__panel rounded-[28px] p-4 sm:p-5 ring-1 ring-white/10">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">Daftar Lokasi</p>
+                                        <h3 class="mt-1 text-xl font-semibold text-white">Rumah sakit dalam jangkauan</h3>
+                                    </div>
+                                    <div class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+                                        Drag map untuk eksplor area
+                                    </div>
+                                </div>
+                                <div data-hospital-list class="mt-4 grid gap-3">
+                                    <div class="hospital-map__list-item hospital-map__skeleton h-[88px] rounded-[24px]"></div>
+                                    <div class="hospital-map__list-item hospital-map__skeleton h-[88px] rounded-[24px]"></div>
+                                    <div class="hospital-map__list-item hospital-map__skeleton h-[88px] rounded-[24px]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative overflow-hidden rounded-[30px] ring-1 ring-white/10 bg-slate-950/40">
+                            <div class="absolute left-4 top-4 z-[500] inline-flex items-center gap-2 rounded-full bg-slate-950/70 px-3 py-2 text-xs font-semibold text-white backdrop-blur">
+                                <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                Leaflet + OpenStreetMap
+                            </div>
+                            <div class="absolute bottom-4 left-4 right-4 z-[500] flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-950/65 px-4 py-3 text-xs text-slate-100 backdrop-blur">
+                                <span>Geser peta, zoom, lalu klik marker untuk detail dan rute.</span>
+                                <span data-map-hint class="font-semibold text-emerald-200">Sedang mengambil lokasi Anda...</span>
+                            </div>
+                            <div id="hospital-map" class="hospital-map"></div>
                         </div>
                     </div>
                 </div>
@@ -206,17 +423,399 @@
         </section>
     </main>
 
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
     <script>
         (() => {
             const slider = document.querySelector('[data-disease-slider]');
             const controls = document.querySelectorAll('[data-disease-scroll]');
-            if (!slider) return;
-            controls.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const dir = btn.dataset.diseaseScroll === 'left' ? -1 : 1;
-                    slider.scrollBy({ left: dir * 260, behavior: 'smooth' });
+            if (slider) {
+                controls.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const dir = btn.dataset.diseaseScroll === 'left' ? -1 : 1;
+                        slider.scrollBy({ left: dir * 260, behavior: 'smooth' });
+                    });
                 });
+            }
+
+            const mapContainer = document.getElementById('hospital-map');
+            if (!mapContainer || typeof window.L === 'undefined') {
+                return;
+            }
+
+            const fallbackLocation = {
+                lat: -6.1754,
+                lng: 106.8272,
+                label: 'Jakarta Pusat',
+            };
+
+            const mapStatus = document.querySelector('[data-map-status]');
+            const mapLocation = document.querySelector('[data-map-location]');
+            const mapCount = document.querySelector('[data-map-count]');
+            const mapNearest = document.querySelector('[data-map-nearest]');
+            const mapHint = document.querySelector('[data-map-hint]');
+            const listContainer = document.querySelector('[data-hospital-list]');
+            const refreshButton = document.querySelector('[data-map-refresh]');
+
+            const map = L.map(mapContainer, {
+                zoomControl: false,
+                attributionControl: true,
+            }).setView([fallbackLocation.lat, fallbackLocation.lng], 13);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                subdomains: 'abcd',
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            }).addTo(map);
+
+            const hospitalLayer = L.layerGroup().addTo(map);
+            let userMarker = null;
+            let hospitalMarkers = [];
+            let activeHospitalId = null;
+            let currentLocation = { ...fallbackLocation };
+            let requestId = 0;
+            let hospitals = [];
+
+            const userIcon = L.divIcon({
+                className: 'user-marker',
+                html: '<div class="user-marker__pin"></div>',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9],
             });
+
+            const hospitalIcon = L.divIcon({
+                className: 'hospital-marker',
+                html: '<div class="hospital-marker__pin"></div>',
+                iconSize: [22, 22],
+                iconAnchor: [11, 11],
+                popupAnchor: [0, -12],
+            });
+
+            const escapeHtml = (value) => String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+
+            const setStatus = (message, tone = 'loading') => {
+                if (!mapStatus) return;
+                mapStatus.textContent = message;
+                mapStatus.dataset.tone = tone;
+            };
+
+            const setHint = (message) => {
+                if (mapHint) {
+                    mapHint.textContent = message;
+                }
+            };
+
+            const renderSkeletonList = () => {
+                if (!listContainer) return;
+                listContainer.innerHTML = `
+                    <div class="hospital-map__list-item hospital-map__skeleton h-[88px] rounded-[24px]"></div>
+                    <div class="hospital-map__list-item hospital-map__skeleton h-[88px] rounded-[24px]"></div>
+                    <div class="hospital-map__list-item hospital-map__skeleton h-[88px] rounded-[24px]"></div>
+                `;
+            };
+
+            const distanceKm = (from, to) => {
+                const toRadians = (value) => (value * Math.PI) / 180;
+                const earthRadius = 6371;
+                const deltaLat = toRadians(to.lat - from.lat);
+                const deltaLng = toRadians(to.lng - from.lng);
+                const a =
+                    Math.sin(deltaLat / 2) ** 2 +
+                    Math.cos(toRadians(from.lat)) *
+                    Math.cos(toRadians(to.lat)) *
+                    Math.sin(deltaLng / 2) ** 2;
+                return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            };
+
+            const formatDistance = (distance) => {
+                if (distance < 1) {
+                    return `${Math.round(distance * 1000)} m`;
+                }
+
+                return `${distance.toFixed(1)} km`;
+            };
+
+            const updateStats = () => {
+                if (mapLocation) {
+                    mapLocation.textContent = currentLocation.label;
+                }
+
+                if (mapCount) {
+                    mapCount.textContent = `${hospitals.length} lokasi`;
+                }
+
+                if (mapNearest) {
+                    mapNearest.textContent = hospitals[0]
+                        ? `${formatDistance(hospitals[0].distance)}`
+                        : 'Belum tersedia';
+                }
+            };
+
+            const focusHospital = (id, shouldFly = true) => {
+                const target = hospitals.find((hospital) => hospital.id === id);
+                if (!target) {
+                    return;
+                }
+
+                activeHospitalId = id;
+
+                document.querySelectorAll('[data-hospital-item]').forEach((item) => {
+                    item.classList.toggle('is-active', item.dataset.hospitalItem === id);
+                });
+
+                const marker = hospitalMarkers.find((entry) => entry.id === id)?.marker;
+                if (marker) {
+                    marker.openPopup();
+                    if (shouldFly) {
+                        map.flyTo([target.lat, target.lng], Math.max(map.getZoom(), 15), {
+                            duration: 1.1,
+                        });
+                    }
+                }
+
+                setHint(`Fokus pada ${target.name}. Klik "Rute" untuk buka navigasi.`);
+            };
+
+            const renderHospitalList = () => {
+                if (!listContainer) {
+                    return;
+                }
+
+                if (!hospitals.length) {
+                    listContainer.innerHTML = `
+                        <div class="rounded-[24px] border border-dashed border-white/15 bg-white/5 px-4 py-6 text-sm text-emerald-50/80">
+                            Belum ada rumah sakit yang ditemukan di area ini. Coba gunakan lokasi Anda lagi atau geser area peta ke wilayah lain.
+                        </div>
+                    `;
+                    return;
+                }
+
+                listContainer.innerHTML = hospitals.map((hospital, index) => `
+                    <button
+                        type="button"
+                        data-hospital-item="${hospital.id}"
+                        class="hospital-map__list-item ${index === 0 ? 'is-active' : ''} w-full rounded-[24px] p-4 text-left"
+                    >
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="text-base font-semibold text-white">${escapeHtml(hospital.name)}</p>
+                                <p class="mt-1 text-sm text-emerald-50/80">${escapeHtml(hospital.address)}</p>
+                            </div>
+                            <span class="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-emerald-100">
+                                ${formatDistance(hospital.distance)}
+                            </span>
+                        </div>
+                        <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-emerald-100/90">
+                            <span>${hospital.emergency ? 'IGD tersedia' : 'Informasi IGD tidak tersedia'}</span>
+                            <span>${escapeHtml(hospital.openLabel)}</span>
+                            <span class="font-semibold text-emerald-200">Klik untuk fokus ke peta</span>
+                        </div>
+                    </button>
+                `).join('');
+
+                document.querySelectorAll('[data-hospital-item]').forEach((item) => {
+                    item.addEventListener('click', () => {
+                        focusHospital(item.dataset.hospitalItem);
+                    });
+                });
+            };
+
+            const renderHospitalsOnMap = () => {
+                hospitalLayer.clearLayers();
+                hospitalMarkers = [];
+
+                hospitals.forEach((hospital) => {
+                    const marker = L.marker([hospital.lat, hospital.lng], { icon: hospitalIcon })
+                        .bindPopup(`
+                            <div class="space-y-2">
+                                <p class="text-base font-semibold text-slate-900">${escapeHtml(hospital.name)}</p>
+                                <p class="text-sm text-slate-600">${escapeHtml(hospital.address)}</p>
+                                <p class="text-xs font-semibold text-emerald-700">${formatDistance(hospital.distance)} dari titik Anda</p>
+                                <a
+                                    class="hospital-popup__link"
+                                    href="https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lng}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Buka rute di Google Maps
+                                </a>
+                            </div>
+                        `)
+                        .addTo(hospitalLayer);
+
+                    marker.on('click', () => focusHospital(hospital.id, false));
+                    hospitalMarkers.push({ id: hospital.id, marker });
+                });
+            };
+
+            const normalizeHospital = (element) => {
+                const latitude = element.lat ?? element.center?.lat;
+                const longitude = element.lon ?? element.center?.lon;
+
+                if (!latitude || !longitude) {
+                    return null;
+                }
+
+                const tags = element.tags ?? {};
+                const street = [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' ');
+                const city = [tags['addr:suburb'], tags['addr:city'], tags['addr:state']].filter(Boolean).join(', ');
+                const fallbackAddress = tags.operator || tags['contact:website'] || 'Alamat belum tersedia';
+
+                return {
+                    id: `${element.type}-${element.id}`,
+                    lat: latitude,
+                    lng: longitude,
+                    name: tags.name || tags['name:id'] || 'Rumah Sakit',
+                    address: [street, city].filter(Boolean).join(', ') || fallbackAddress,
+                    emergency: tags.emergency === 'yes',
+                    openLabel: tags.opening_hours ? `Jam: ${tags.opening_hours}` : 'Jam operasional cek langsung',
+                };
+            };
+
+            const updateUserMarker = () => {
+                if (!userMarker) {
+                    userMarker = L.marker([currentLocation.lat, currentLocation.lng], { icon: userIcon })
+                        .addTo(map)
+                        .bindPopup('Lokasi Anda saat ini');
+                    return;
+                }
+
+                userMarker.setLatLng([currentLocation.lat, currentLocation.lng]);
+            };
+
+            const fetchHospitals = async (lat, lng) => {
+                const thisRequest = ++requestId;
+                renderSkeletonList();
+                setStatus('Mencari rumah sakit di sekitar Anda...', 'loading');
+                setHint('Mengambil data rumah sakit terdekat dari OpenStreetMap...');
+
+                const query = `
+                    [out:json][timeout:25];
+                    (
+                      node["amenity"="hospital"](around:9000,${lat},${lng});
+                      way["amenity"="hospital"](around:9000,${lat},${lng});
+                      relation["amenity"="hospital"](around:9000,${lat},${lng});
+                    );
+                    out center;
+                `;
+
+                try {
+                    const response = await fetch('https://overpass-api.de/api/interpreter', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=UTF-8',
+                        },
+                        body: query.trim(),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Gagal mengambil data rumah sakit.');
+                    }
+
+                    const data = await response.json();
+                    if (thisRequest !== requestId) {
+                        return;
+                    }
+
+                    const seen = new Set();
+                    hospitals = (data.elements ?? [])
+                        .map(normalizeHospital)
+                        .filter(Boolean)
+                        .filter((hospital) => {
+                            const key = `${hospital.name}-${hospital.lat}-${hospital.lng}`;
+                            if (seen.has(key)) {
+                                return false;
+                            }
+                            seen.add(key);
+                            return true;
+                        })
+                        .map((hospital) => ({
+                            ...hospital,
+                            distance: distanceKm({ lat, lng }, hospital),
+                        }))
+                        .sort((first, second) => first.distance - second.distance)
+                        .slice(0, 6);
+
+                    renderHospitalsOnMap();
+                    renderHospitalList();
+                    updateStats();
+
+                    if (hospitals.length) {
+                        setStatus(`${hospitals.length} rumah sakit ditemukan`, 'success');
+                        focusHospital(hospitals[0].id, false);
+                    } else {
+                        setStatus('Belum ada rumah sakit pada area ini', 'error');
+                        setHint('Coba geser peta ke area lain atau gunakan lokasi Anda lagi.');
+                    }
+                } catch (error) {
+                    if (thisRequest !== requestId) {
+                        return;
+                    }
+
+                    hospitals = [];
+                    renderHospitalList();
+                    updateStats();
+                    setStatus('Tidak dapat memuat data rumah sakit saat ini', 'error');
+                    setHint('Periksa koneksi internet lalu coba lagi beberapa saat.');
+                }
+            };
+
+            const useLocation = (location, shouldFly = true) => {
+                currentLocation = location;
+                updateUserMarker();
+                updateStats();
+
+                if (shouldFly) {
+                    map.flyTo([location.lat, location.lng], 13, { duration: 1.1 });
+                }
+
+                fetchHospitals(location.lat, location.lng);
+            };
+
+            const detectLocation = () => {
+                if (!navigator.geolocation) {
+                    setStatus('Browser tidak mendukung geolokasi, memakai Jakarta', 'error');
+                    setHint('Geolokasi tidak tersedia. Menampilkan rumah sakit sekitar Jakarta.');
+                    useLocation(fallbackLocation, true);
+                    return;
+                }
+
+                setStatus('Meminta akses lokasi Anda...', 'loading');
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        useLocation({
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            label: 'Lokasi Anda',
+                        });
+                    },
+                    () => {
+                        setStatus('Izin lokasi ditolak, memakai Jakarta sebagai acuan', 'error');
+                        setHint('Aktifkan izin lokasi untuk hasil yang lebih akurat.');
+                        useLocation(fallbackLocation, true);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000,
+                    }
+                );
+            };
+
+            refreshButton?.addEventListener('click', detectLocation);
+
+            detectLocation();
         })();
     </script>
 

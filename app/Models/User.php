@@ -6,10 +6,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens; // <-- Pindahkan ke sini
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable; // <-- Gabungkan dalam satu use
 
     /**
      * The attributes that are mass assignable.
@@ -23,16 +24,17 @@ class User extends Authenticatable
         'height',
         'weight',
         'password',
-        'role', // <-- PENTING: Tambahkan 'role' di sini.
+        'role',
         'phone',
         'workplace',
         'specialty',
         'about',
+        'doctor_idi_number',
+        'doctor_str_file',
+        'doctor_sip_file',
+        'doctor_verification_status',
+        'doctor_verified_at',
     ];
-    // PENJELASAN $fillable: Ini adalah daftar "izin". Laravel hanya akan
-    // mengizinkan kolom-kolom dalam daftar ini untuk diisi secara otomatis
-    // dari sebuah form. Ini adalah fitur keamanan untuk mencegah pengisian
-    // kolom yang tidak seharusnya (seperti kolom `is_admin` jika ada).
 
     /**
      * The attributes that should be hidden for serialization.
@@ -54,39 +56,67 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'doctor_verified_at' => 'datetime',
         ];
     }
 
-    // --- MULAI PENAMBAHAN KODE KITA ---
+    // --- RELATIONS ---
 
     /**
-     * Mendefinisikan relasi "One-to-Many": Satu User memiliki banyak Artikel.
-     * Nama fungsi `articles()` (jamak) adalah konvensi untuk relasi one-to-many.
+     * Relasi ke Article (One-to-Many)
      */
     public function articles()
     {
-        // `hasMany` berarti "memiliki banyak".
         return $this->hasMany(Article::class);
     }
 
     /**
-     * Fungsi pembantu (helper) untuk membuat pengecekan role lebih bersih.
-     * Daripada menulis `if (auth()->user()->role == 'dokter')`,
-     * kita bisa menulis `if (auth()->user()->isDokter())`.
+     * Relasi ke Keluhan (One-to-Many)
+     */
+    public function keluhans()
+    {
+        return $this->hasMany(Keluhan::class);
+    }
+
+    // --- ROLE HELPERS ---
+
+    /**
+     * Cek apakah user adalah dokter
      */
     public function isDokter()
     {
         return $this->role === 'dokter';
     }
 
+    /**
+     * Cek apakah user butuh approval dokter
+     */
+    public function requiresDoctorApproval()
+    {
+        return $this->role === 'dokter';
+    }
+
+    /**
+     * Cek apakah dokter sudah disetujui
+     */
+    public function isApprovedDoctor()
+    {
+        return $this->role === 'dokter' && $this->doctor_verification_status === 'approved';
+    }
+
+    /**
+     * Cek apakah user bisa akses area dokter
+     */
+    public function canAccessDoctorArea()
+    {
+        return !$this->requiresDoctorApproval() || $this->isApprovedDoctor();
+    }
+
+    /**
+     * Cek apakah user adalah admin
+     */
     public function isAdmin()
     {
         return $this->role === 'admin';
     }
-    
-    public function keluhans()
-{
-    return $this->hasMany(Keluhan::class);
-}
-
 }

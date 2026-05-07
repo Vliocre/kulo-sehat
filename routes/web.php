@@ -20,12 +20,6 @@ use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\TopicGuideController as AdminTopicGuideController;
 use App\Http\Controllers\KalkulatorController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
 // RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/kalkulator', [KalkulatorController::class, 'index'])->name('kalkulator.public.index');
@@ -45,12 +39,20 @@ Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');
     }
 
-    if ($user->isDokter()) {
+    if ($user->requiresDoctorApproval() && ! $user->canAccessDoctorArea()) {
+        Auth::guard('web')->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()
+            ->route('login')
+            ->withErrors(['role' => 'Akun dokter Anda belum disetujui admin.']);
+    }
+
+    if ($user->isApprovedDoctor()) {
         return redirect()->route('doctor.dashboard');
     }
 
-    // === PERUBAHAN DI SINI ===
-    // Mengambil 3 artikel terbaru untuk dashboard pengguna, sama seperti beranda
     $latestArticles = Article::where('status', 'published')
                                 ->latest()
                                 ->take(3)
@@ -78,11 +80,11 @@ Route::middleware(['auth', 'verified', 'role:dokter'])
         Route::get('/dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
         Route::resource('articles', DoctorArticleController::class);
 });
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:dokter'])->group(function () {
     Route::get('/dokter/dashboard', function () {
-        return view('doctor.dashboard');
+        return redirect()->route('doctor.dashboard');
     })->name('dokter.dashboard');
-}); 
+});
 
 
 
@@ -92,6 +94,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])
     ->as('admin.')
     ->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::post('users/{user}/approve-doctor', [UserManagementController::class, 'approveDoctor'])->name('users.approve-doctor');
+        Route::post('users/{user}/reject-doctor', [UserManagementController::class, 'rejectDoctor'])->name('users.reject-doctor');
         Route::resource('users', UserManagementController::class);
         Route::resource('articles', AdminArticleController::class);
         Route::post('topic-guides/import-defaults', [AdminTopicGuideController::class, 'importDefaults'])->name('topic-guides.import-defaults');

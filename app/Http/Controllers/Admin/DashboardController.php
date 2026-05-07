@@ -14,12 +14,16 @@ class DashboardController extends Controller
     {
         $totalUsers = User::count();
         $totalDoctors = User::where('role', 'dokter')->count();
+        $pendingDoctors = User::where('role', 'dokter')
+            ->where('doctor_verification_status', 'pending')
+            ->count();
         $totalArticles = Article::count();
         $totalCategories = Category::count();
 
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalDoctors',
+            'pendingDoctors',
             'totalArticles',
             'totalCategories'
         ));

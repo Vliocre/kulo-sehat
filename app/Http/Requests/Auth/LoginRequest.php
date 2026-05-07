@@ -68,6 +68,16 @@ class LoginRequest extends FormRequest
             if ($selectedRole !== $user->role) {
                 $this->throwFailedAuthentication('role', 'Pilihan login tidak sesuai dengan akun yang terdaftar.');
             }
+
+            if ($user->role === 'dokter' && ! $user->isApprovedDoctor()) {
+                $message = match ($user->doctor_verification_status) {
+                    'pending' => 'Akun dokter Anda masih menunggu persetujuan admin.',
+                    'rejected' => 'Akun dokter Anda belum disetujui admin. Hubungi admin untuk informasi lebih lanjut.',
+                    default => 'Akun dokter Anda belum aktif. Lengkapi verifikasi dan tunggu persetujuan admin.',
+                };
+
+                $this->throwFailedAuthentication('role', $message);
+            }
         }
 
         Auth::login($user, $this->boolean('remember'));

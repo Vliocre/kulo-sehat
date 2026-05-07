@@ -30,7 +30,7 @@
             <div class="flex items-center justify-between gap-4">
                 <div>
                     <p class="text-sm uppercase tracking-[0.35em] text-gray-400 font-semibold">Kumpulan Artikel</p>
-                    <h1 class="text-3xl font-bold text-gray-900 mt-2">Artikel Berdasarkan Kategori BMI</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 mt-2">Artikel Gaya Hidup Sehat</h1>
                     <p class="mt-3 max-w-3xl text-sm text-gray-600">
                         Pilih artikel sesuai hasil BMI Anda: kurus, ideal, gemuk, atau obesitas.
                     </p>

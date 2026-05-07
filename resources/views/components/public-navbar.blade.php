@@ -9,8 +9,8 @@
     $categoryItems = collect($categories);
 @endphp
 
-<header {{ $attributes->merge(['class' => $class]) }}>
-    <div class="max-w-7xl mx-auto bg-white/95 backdrop-blur-sm rounded-[28px] shadow-lg">
+<header {{ $attributes->merge(['class' => trim($class . ' z-50')]) }}>
+    <div class="relative z-50 max-w-7xl mx-auto bg-white/95 backdrop-blur-sm rounded-[28px] shadow-lg">
         <nav class="px-6 py-4">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
@@ -52,7 +52,7 @@
 
                     {{-- KELUHAN DOKTER --}}
                     @auth
-                        @if(Auth::user()->role === 'dokter')
+                        @if(Auth::user()->isApprovedDoctor())
                             <a href="{{ route('dokter.keluhan') }}"
                                class="hover:text-green-600 {{ request()->routeIs('dokter.keluhan') ? 'text-green-600' : 'text-gray-700' }}">
                                 Keluhan Pasien
@@ -74,7 +74,7 @@
                         </button>
 
                         <div x-show="open" x-cloak
-                             class="absolute mt-3 w-48 bg-white rounded-xl shadow-xl py-2">
+                             class="absolute z-[60] mt-3 w-48 bg-white rounded-xl shadow-xl py-2">
                             @if ($categoryItems->isNotEmpty())
                                 @foreach ($categoryItems as $category)
                                     @php $isActive = $activeCategorySlug === $category->slug; @endphp
@@ -150,14 +150,14 @@
                             </button>
 
                             <div x-show="open" x-cloak
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1">
+                                 class="absolute right-0 z-[60] mt-2 w-48 bg-white rounded-xl shadow-lg py-1">
 
                                 <a href="{{ route('profile.edit') }}"
                                    class="block px-4 py-2 hover:bg-gray-100">
                                     Profil
                                 </a>
 
-                                @if(Auth::user()->role === 'dokter')
+                                @if(Auth::user()->isApprovedDoctor())
                                     <a href="{{ route('doctor.articles.index') }}"
                                        class="block px-4 py-2 hover:bg-gray-100">
                                         Kelola Artikel

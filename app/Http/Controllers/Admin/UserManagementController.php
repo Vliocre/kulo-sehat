@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User; // Import model User
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule; // Untuk validasi
 
@@ -15,7 +16,11 @@ class UserManagementController extends Controller
     public function index()
     {
         $users = User::latest()->paginate(10);
-        return view('admin.users.index', compact('users'));
+        $pendingDoctorCount = User::where('role', 'dokter')
+            ->where('doctor_verification_status', 'pending')
+            ->count();
+
+        return view('admin.users.index', compact('users', 'pendingDoctorCount'));
     }
 
     /**
@@ -41,7 +46,21 @@ class UserManagementController extends Controller
             'age' => 'nullable|integer|min:0',
             'height' => 'nullable|numeric|min:0',
             'weight' => 'nullable|numeric|min:0',
+            'doctor_verification_status' => ['nullable', 'string', Rule::in(['pending', 'approved', 'rejected'])],
         ]);
+
+        $doctorStatus = $user->doctor_verification_status;
+        $doctorVerifiedAt = $user->doctor_verified_at;
+
+        if ($request->role === 'dokter') {
+            $doctorStatus = $request->doctor_verification_status ?: ($doctorStatus === 'not_required' ? 'approved' : $doctorStatus);
+            $doctorVerifiedAt = $doctorStatus === 'approved' ? ($user->doctor_verified_at ?? now()) : null;
+        }
+
+        if ($request->role !== 'dokter') {
+            $doctorStatus = 'not_required';
+            $doctorVerifiedAt = null;
+        }
 
         // 2. Update data pengguna
         $user->update([
@@ -51,10 +70,36 @@ class UserManagementController extends Controller
             'age' => $request->age,
             'height' => $request->height,
             'weight' => $request->weight,
+            'doctor_verification_status' => $doctorStatus,
+            'doctor_verified_at' => $doctorVerifiedAt,
         ]);
 
         // 3. Redirect kembali ke halaman daftar pengguna dengan pesan sukses
         return redirect()->route('admin.users.index')->with('success', 'Data pengguna berhasil diperbarui.');
+    }
+
+    public function approveDoctor(User $user): RedirectResponse
+    {
+        abort_unless($user->role === 'dokter', 404);
+
+        $user->update([
+            'doctor_verification_status' => 'approved',
+            'doctor_verified_at' => now(),
+        ]);
+
+        return redirect()->route('admin.users.index')->with('success', 'Akun dokter berhasil disetujui.');
+    }
+
+    public function rejectDoctor(User $user): RedirectResponse
+    {
+        abort_unless($user->role === 'dokter', 404);
+
+        $user->update([
+            'doctor_verification_status' => 'rejected',
+            'doctor_verified_at' => null,
+        ]);
+
+        return redirect()->route('admin.users.index')->with('success', 'Akun dokter ditandai belum disetujui.');
     }
 
     // Method create, store, dan destroy bisa Anda kembangkan selanjutnya.

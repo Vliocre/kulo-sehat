@@ -41,6 +41,11 @@
         <section class="relative pt-28 pb-16 lg:pb-20">
             <div class="max-w-6xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6 relative">
+                    @if (session('status'))
+                        <div class="rounded-2xl border border-emerald-200 bg-white/90 px-5 py-4 text-sm text-emerald-800 shadow-sm">
+                            {{ session('status') }}
+                        </div>
+                    @endif
                     <div class="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-100">
                         <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                         Untuk keluarga Indonesia

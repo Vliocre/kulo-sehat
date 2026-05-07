@@ -97,7 +97,7 @@
                                         <span class="ml-2 text-sm text-gray-700">Dokter</span>
                                     </label>
                                 </div>
-                                <p class="mt-2 text-xs text-gray-500">Kosongkan pilihan ini jika login sebagai admin.</p>
+                                <p class="mt-2 text-xs text-gray-500">Akun dokter hanya bisa login setelah data IDI, STR, dan SIP disetujui admin.</p>
                                 <x-input-error :messages="$errors->get('role')" class="mt-2" />
                             </div>
 
