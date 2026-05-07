@@ -23,14 +23,28 @@ RUN docker-php-ext-install \
     gd \
     opcache \
     zip
+# install node
+RUN apk add --no-cache nodejs npm
 
+# copy project
+COPY . .
+
+# install & build vite
+RUN npm install
+RUN npm run build
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --optimize-autoloader --no-dev
+RUN git config --global --add safe.directory /var/www/html
+
+# 🔥 FIX UTAMA
+RUN composer install --no-dev --no-scripts --optimize-autoloader
+
+RUN cp .env.example .env || true
+RUN php artisan key:generate || true
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
