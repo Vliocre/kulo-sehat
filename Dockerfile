@@ -1,5 +1,7 @@
 FROM php:8.2-fpm-alpine
 
+WORKDIR /var/www/html
+
 RUN apk add --no-cache \
     nginx \
     nodejs \
@@ -23,24 +25,16 @@ RUN docker-php-ext-install \
     gd \
     opcache \
     zip
-# install node
-RUN apk add --no-cache nodejs npm
 
-# copy project
-COPY . .
-
-# install & build vite
-RUN npm install
-RUN npm run build
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www/html
-
 COPY . .
+
+RUN npm install
+RUN npm run build
 
 RUN git config --global --add safe.directory /var/www/html
 
-# 🔥 FIX UTAMA
 RUN composer install --no-dev --no-scripts --optimize-autoloader
 
 RUN cp .env.example .env || true
