@@ -83,34 +83,28 @@ jobs:
 
           script: |
             set -e
-            echo "🚀 Mulai deployment..."
+            echo "🚀 Start deployment..."
 
+            # 1. Masuk ke folder project yang sudah kita buat manual di VPS
             cd ~/RPL2D-kelompok-7
 
-            # 1. Setup Nama Image (Lowercase)
+            # 2. Setup Nama Image (Lowercase)
             export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
 
-            # 2. Pull image terbaru
-            echo "📦 Pulling image..."
+            # 3. Tarik image terbaru
+            echo "📦 Pulling image: $APP_IMAGE"
             docker-compose pull
 
-            # 3. Hapus Container lama secara total (Solusi KeyError: ContainerConfig)
-            echo "♻️ Menghapus container lama..."
+            # 4. Restart container (Down then Up untuk fix bug ContainerConfig)
+            echo "♻️ Resetting containers..."
             docker-compose down --remove-orphans
-
-            # Hapus paksa jika down gagal membersihkan (opsional tapi aman)
-            docker rm -f kelompok7_app_1 kelompok7_db_1 || true
-
-            # 4. Nyalakan container baru dari nol
-            echo "🏗️ Menjalankan container baru..."
             docker-compose up -d
 
             # 5. Tunggu database ready
-            echo "⏳ Menunggu database..."
+            echo "⏳ Waiting for database..."
             sleep 15
 
             # 6. Jalankan migration
-            # Note: Jika error 'table already exists', hapus salah satu file migrasi ganda di folder database/migrations Anda di lokal, lalu push kembali.
             echo "📂 Running migrations..."
             docker-compose exec -T app php artisan migrate --force --no-interaction
 
