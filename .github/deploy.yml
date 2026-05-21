@@ -29,7 +29,7 @@ jobs:
       - name: Generate app key
         run: php artisan key:generate
       - name: Run PHPUnit tests
-        run: php artisan test || true # Pakai || true jika Anda ingin tetap deploy meski test gagal
+        run: php artisan test || true
 
   # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
   build-and-push:
@@ -52,7 +52,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${_IMAGE_NAME}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} # <-- FIXED TYPO DISINI
           tags: |
             type=sha,prefix=sha-
             type=raw,value=latest
@@ -79,25 +79,25 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 8022
-          command_timeout: 60m # Ditingkatkan ke 60 menit agar tidak timeout saat download
+          command_timeout: 60m
 
           script: |
             set -e
             echo "🚀 Mulai deployment..."
 
-            # 1. Masuk ke folder project (Sesuaikan dengan folder asli Anda!)
+            # 1. Masuk ke folder project
             cd ~/RPL2D-kelompok-7
 
-            # 2. Setup Nama Image (WAJIB lowercase agar terbaca Docker)
+            # 2. Setup Nama Image (Lowercase)
             export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
 
-            # 3. Pull image terbaru (Image sudah Public jadi tidak perlu login lagi)
+            # 3. Pull image terbaru
             echo "📦 Pulling latest image: $APP_IMAGE"
             docker-compose pull
 
-            # 4. Restart container (Gunakan 'down' dulu untuk fix bug ContainerConfig)
+            # 4. Restart container (Down then Up untuk fix bug ContainerConfig)
             echo "♻️ Restarting containers..."
-            docker-compose down
+            docker-compose down --remove-orphans
             docker-compose up -d
 
             # 5. Tunggu database ready
