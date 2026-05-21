@@ -10,7 +10,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # ─── JOB 1: TESTING ───────────────────────────────────────
+  # ─── JOB 1: TESTING ───
   test:
     name: Run Tests
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
       - name: Run PHPUnit tests
         run: php artisan test || true
 
-  # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
+  # ─── JOB 2: BUILD & PUSH IMAGE ───
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
@@ -64,7 +64,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  # ─── JOB 3: DEPLOY KE VPS (VERSI ANTI GAGAL TANPA SCP) ────
+  # ─── JOB 3: DEPLOY KE VPS (VERSI TANPA SCP) ───
   deploy:
     name: Deploy ke VPS
     runs-on: ubuntu-latest
@@ -81,15 +81,15 @@ jobs:
 
           script: |
             set -e
-            echo "🚀 Start deployment..."
+            echo "🚀 Mulai deployment tanpa SCP..."
 
-            # 1. Masuk ke folder project di VPS
+            # 1. Masuk ke folder project yang sudah ada di VPS
             cd ~/RPL2D-kelompok-7
 
             # 2. Setup Nama Image (Lowercase)
             export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
 
-            # 3. Pull image terbaru (Image sudah Public)
+            # 3. Pull image terbaru
             echo "📦 Pulling image: $APP_IMAGE"
             docker-compose pull
 
@@ -99,7 +99,7 @@ jobs:
             docker-compose up -d
 
             # 5. Tunggu database ready
-            echo "⏳ Waiting for database..."
+            echo "⏳ Menunggu database..."
             sleep 15
 
             # 6. Jalankan migration
@@ -111,4 +111,4 @@ jobs:
             docker-compose exec -T app php artisan config:cache
             docker-compose exec -T app php artisan route:cache
 
-            echo "✅ DEPLOYMENT BERHASIL!"
+            echo "✅ DEPLOYMENT BERHASIL TOTAL!"
