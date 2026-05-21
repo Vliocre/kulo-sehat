@@ -52,7 +52,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} # <-- FIXED TYPO DISINI
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=sha-
             type=raw,value=latest
@@ -63,10 +63,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
-  # ─── JOB 3: DEPLOY KE VPS ────────────────────────────────
+  # ─── JOB 3: DEPLOY KE VPS (VERSI ANTI GAGAL TANPA SCP) ────
   deploy:
     name: Deploy ke VPS
     runs-on: ubuntu-latest
@@ -85,19 +83,19 @@ jobs:
             set -e
             echo "🚀 Start deployment..."
 
-            # 1. Masuk ke folder project yang sudah kita buat manual di VPS
+            # 1. Masuk ke folder project di VPS
             cd ~/RPL2D-kelompok-7
 
             # 2. Setup Nama Image (Lowercase)
             export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
 
-            # 3. Tarik image terbaru
+            # 3. Pull image terbaru (Image sudah Public)
             echo "📦 Pulling image: $APP_IMAGE"
             docker-compose pull
 
             # 4. Restart container (Down then Up untuk fix bug ContainerConfig)
             echo "♻️ Resetting containers..."
-            docker-compose down --remove-orphans
+            docker-compose down --remove-orphans || true
             docker-compose up -d
 
             # 5. Tunggu database ready
@@ -108,9 +106,9 @@ jobs:
             echo "📂 Running migrations..."
             docker-compose exec -T app php artisan migrate --force --no-interaction
 
-            # 7. Optimasi
+            # 7. Optimasi Laravel
             echo "🧹 Optimizing..."
             docker-compose exec -T app php artisan config:cache
             docker-compose exec -T app php artisan route:cache
 
-            echo "✅ DEPLOYMENT SELESAI!"
+            echo "✅ DEPLOYMENT BERHASIL!"
