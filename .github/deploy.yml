@@ -1,3 +1,4 @@
+```yaml
 name: CI/CD Laravel Docker
 
 on:
@@ -94,6 +95,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 8022
+
+          # FIX TIMEOUT
+          command_timeout: 30m
+
           script: |
             set -e
 
@@ -106,16 +111,35 @@ jobs:
             cd /home/${{ secrets.SERVER_USER }}/RPL2X-kelompok-1
 
             # Pull image terbaru
-            docker pull ghcr.io/${{ github.repository }}:latest
+            echo "📦 Pulling latest image..."
+            docker compose pull
 
-            # Update container tanpa downtime besar
+            # Restart container
+            echo "♻️ Restarting containers..."
             docker compose up -d --remove-orphans
 
-            # Tunggu container siap
-            echo "⏳ Menunggu container ready..."
-            sleep 10
+            # Tunggu database ready
+            echo "⏳ Menunggu database ready..."
 
-            # Jalankan migrasi database
+            for i in $(seq 1 30); do
+              if docker compose exec -T db mysqladmin ping -h localhost --silent; then
+                echo "✅ Database ready."
+                break
+              fi
+
+              echo "Still waiting for DB..."
+              sleep 2
+            done
+
+            # Jalankan migration
+            echo "📂 Running migrations..."
             docker compose exec -T app php artisan migrate --force --no-interaction
 
+            # Cache optimize
+            echo "🧹 Optimizing cache..."
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
+
             echo "✅ Deployment selesai!"
+```
