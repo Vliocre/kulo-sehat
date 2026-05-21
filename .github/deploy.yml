@@ -85,40 +85,38 @@ jobs:
             set -e
             echo "🚀 Mulai deployment..."
 
-            # 1. Masuk ke folder project
             cd ~/RPL2D-kelompok-7
 
-            # 2. Setup Nama Image (Lowercase)
+            # 1. Setup Nama Image (Lowercase)
             export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
 
-            # 3. Pull image terbaru
-            echo "📦 Pulling latest image: $APP_IMAGE"
+            # 2. Pull image terbaru
+            echo "📦 Pulling image..."
             docker-compose pull
 
-            # 4. Restart container (Down then Up untuk fix bug ContainerConfig)
-            echo "♻️ Restarting containers..."
+            # 3. Hapus Container lama secara total (Solusi KeyError: ContainerConfig)
+            echo "♻️ Menghapus container lama..."
             docker-compose down --remove-orphans
+
+            # Hapus paksa jika down gagal membersihkan (opsional tapi aman)
+            docker rm -f kelompok7_app_1 kelompok7_db_1 || true
+
+            # 4. Nyalakan container baru dari nol
+            echo "🏗️ Menjalankan container baru..."
             docker-compose up -d
 
             # 5. Tunggu database ready
-            echo "⏳ Menunggu database ready..."
-            for i in $(seq 1 30); do
-              if docker-compose exec -T db mysqladmin ping -h localhost --silent; then
-                echo "✅ Database ready."
-                break
-              fi
-              echo "Still waiting for DB..."
-              sleep 2
-            done
+            echo "⏳ Menunggu database..."
+            sleep 15
 
             # 6. Jalankan migration
+            # Note: Jika error 'table already exists', hapus salah satu file migrasi ganda di folder database/migrations Anda di lokal, lalu push kembali.
             echo "📂 Running migrations..."
             docker-compose exec -T app php artisan migrate --force --no-interaction
 
-            # 7. Cache optimize
-            echo "🧹 Optimizing cache..."
+            # 7. Optimasi
+            echo "🧹 Optimizing..."
             docker-compose exec -T app php artisan config:cache
             docker-compose exec -T app php artisan route:cache
-            docker-compose exec -T app php artisan view:cache
 
-            echo "✅ Deployment selesai!"
+            echo "✅ DEPLOYMENT SELESAI!"
