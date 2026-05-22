@@ -107,29 +107,27 @@ jobs:
             echo "🐳 Docker Compose version:"
             docker-compose version
 
-            # Login ke GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             echo "🧹 Stop old containers..."
             docker-compose down --remove-orphans || true
 
-            echo "🧹 Remove broken containers..."
             docker rm -f kelompok7_app_1 || true
             docker rm -f kelompok7_db_1 || true
 
             echo "📦 Pull latest image..."
             docker-compose pull
 
-            echo "♻️ Recreate containers..."
+            echo "♻️ Starting fresh containers..."
             docker-compose up -d --force-recreate
 
             echo "⏳ Waiting database..."
             sleep 15
 
-            echo "📂 Run migration..."
+            echo "📂 Running migrations..."
             docker-compose exec -T app php artisan migrate --force --no-interaction
 
-            echo "🧹 Optimize Laravel..."
+            echo "🧹 Optimizing Laravel..."
             docker-compose exec -T app php artisan config:cache
             docker-compose exec -T app php artisan route:cache
             docker-compose exec -T app php artisan view:cache
