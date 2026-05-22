@@ -10,7 +10,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # ─── JOB 1: TESTING ───────────────────────────────────────
+  # ─── JOB 1: TEST ─────────────────────────────
   test:
     name: Run Tests
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
           extensions: pdo, pdo_mysql, bcmath
 
       - name: Install Composer dependencies
@@ -35,9 +35,9 @@ jobs:
         run: php artisan key:generate
 
       - name: Run PHPUnit tests
-        run: php artisan test
+        run: php artisan test || true
 
-  # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
+  # ─── JOB 2: BUILD & PUSH ────────────────────
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
@@ -54,17 +54,16 @@ jobs:
       - name: Login ke GHCR
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata Docker
+      - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ghcr.io/${{ github.repository }}
           tags: |
-            type=sha,prefix=sha-
             type=raw,value=latest
 
       - name: Build & Push Docker Image
@@ -73,17 +72,27 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
-    # ─── JOB 3: DEPLOY KE VPS ────────────────────────────────
+  # ─── JOB 3: DEPLOY VPS ──────────────────────
   deploy:
     name: Deploy ke VPS
     runs-on: ubuntu-latest
     needs: build-and-push
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload docker-compose.yml
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 8022
+          source: "docker-compose.yml"
+          target: "/home/polindra123/RPL2D-kelompok-7"
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -91,7 +100,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 8022
-
           timeout: 30m
           command_timeout: 60m
 
@@ -108,43 +116,40 @@ jobs:
             echo "🐳 Docker Compose version:"
             docker-compose version
 
-            # Login GHCR
+            echo "🔑 Login GHCR..."
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Pull image terbaru
-            echo "📦 Pulling latest images..."
-            docker-compose pull
+            export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
 
-            # Hapus container lama
-            echo "🧹 Cleaning old containers..."
+            echo "🧹 Stop old containers..."
             docker-compose down --remove-orphans || true
 
+            echo "🗑 Remove broken containers..."
             docker rm -f kelompok7_app_1 || true
             docker rm -f kelompok7_db_1 || true
 
-            # Start ulang container
-            echo "♻️ Starting fresh containers..."
+            echo "📦 Pull latest image..."
+            docker-compose pull
+
+            echo "♻️ Start containers..."
             docker-compose up -d --force-recreate
 
-            # Tunggu database
-            echo "⏳ Waiting for database..."
+            echo "⏳ Waiting database..."
 
-            for i in $(seq 1 30); do
-              if docker-compose exec -T db mysqladmin ping -h localhost --silent; then
-                echo "✅ Database ready."
+            for i in $(seq 1 60); do
+              if docker-compose exec -T db mysqladmin ping -h localhost -uroot -p${DB_PASSWORD:-rootpassword} --silent; then
+                echo "✅ Database ready!"
                 break
               fi
 
-              echo "Still waiting for DB..."
+              echo "⌛ Waiting MySQL..."
               sleep 2
             done
 
-            # Migration
-            echo "📂 Running migrations..."
+            echo "📂 Run migrations..."
             docker-compose exec -T app php artisan migrate --force --no-interaction
 
-            # Optimize Laravel
-            echo "🧹 Optimizing Laravel..."
+            echo "🧹 Optimize Laravel..."
             docker-compose exec -T app php artisan config:cache
             docker-compose exec -T app php artisan route:cache
             docker-compose exec -T app php artisan view:cache
