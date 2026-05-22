@@ -10,7 +10,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # ─── JOB 1: TEST ─────────────────────────────
   test:
     name: Run Tests
     runs-on: ubuntu-latest
@@ -37,7 +36,6 @@ jobs:
       - name: Run PHPUnit tests
         run: php artisan test || true
 
-  # ─── JOB 2: BUILD & PUSH ────────────────────
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
@@ -54,7 +52,7 @@ jobs:
       - name: Login ke GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -62,7 +60,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest
 
@@ -73,7 +71,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
-  # ─── JOB 3: DEPLOY VPS ──────────────────────
   deploy:
     name: Deploy ke VPS
     runs-on: ubuntu-latest
@@ -82,6 +79,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Prepare remote directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 8022
+          script: |
+            mkdir -p /home/polindra123/RPL2D-kelompok-7
 
       - name: Upload docker-compose.yml
         uses: appleboy/scp-action@v0.1.7
@@ -108,50 +115,64 @@ jobs:
 
             echo "🚀 Mulai deployment..."
 
-            cd ~/RPL2D-kelompok-7
+            cd /home/polindra123/RPL2D-kelompok-7
+
+            # Hapus docker-compose v1 lama (PENTING)
+            sudo rm -f /usr/bin/docker-compose || true
+
+            # Install Docker Compose v2 jika belum ada
+            if ! docker compose version > /dev/null 2>&1; then
+              echo "📦 Installing Docker Compose v2..."
+
+              sudo apt-get update
+              sudo apt-get install -y docker-compose-plugin
+            fi
 
             echo "🐳 Docker version:"
             docker --version
 
             echo "🐳 Docker Compose version:"
-            docker-compose version
+            docker compose version
 
-            echo "🔑 Login GHCR..."
+            # Login GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+            # Lowercase image name
             export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
 
-            echo "🧹 Stop old containers..."
-            docker-compose down --remove-orphans || true
+            echo "🧹 Cleaning broken containers..."
+            docker compose down --remove-orphans || true
 
-            echo "🗑 Remove broken containers..."
             docker rm -f kelompok7_app_1 || true
             docker rm -f kelompok7_db_1 || true
 
-            echo "📦 Pull latest image..."
-            docker-compose pull
+            echo "🧹 Cleaning Docker cache..."
+            docker system prune -af || true
 
-            echo "♻️ Start containers..."
-            docker-compose up -d --force-recreate
+            echo "📦 Pulling latest images..."
+            docker compose pull
 
-            echo "⏳ Waiting database..."
+            echo "♻️ Starting fresh containers..."
+            docker compose up -d --force-recreate
 
-            for i in $(seq 1 60); do
-              if docker-compose exec -T db mysqladmin ping -h localhost -uroot -p${DB_PASSWORD:-rootpassword} --silent; then
-                echo "✅ Database ready!"
+            echo "⏳ Waiting for database..."
+
+            for i in $(seq 1 30); do
+              if docker compose exec -T db mysqladmin ping -h localhost --silent; then
+                echo "✅ Database ready."
                 break
               fi
 
-              echo "⌛ Waiting MySQL..."
+              echo "Still waiting for DB..."
               sleep 2
             done
 
-            echo "📂 Run migrations..."
-            docker-compose exec -T app php artisan migrate --force --no-interaction
+            echo "📂 Running migrations..."
+            docker compose exec -T app php artisan migrate --force --no-interaction
 
-            echo "🧹 Optimize Laravel..."
-            docker-compose exec -T app php artisan config:cache
-            docker-compose exec -T app php artisan route:cache
-            docker-compose exec -T app php artisan view:cache
+            echo "🧹 Optimizing Laravel..."
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
 
             echo "✅ Deployment selesai!"
