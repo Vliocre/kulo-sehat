@@ -101,21 +101,37 @@ jobs:
 
             echo "🚀 Mulai deployment..."
 
-            # Masuk ke folder project
             cd ~/RPL2D-kelompok-7
 
-            # Login ke GHCR
+            # Install Docker Compose v2 jika belum ada
+            if ! docker compose version > /dev/null 2>&1; then
+              echo "📦 Installing Docker Compose v2..."
+
+              sudo apt-get update
+              sudo apt-get remove -y docker-compose || true
+              sudo apt-get install -y docker-compose-plugin
+            fi
+
+            echo "🐳 Docker Compose version:"
+            docker compose version
+
+            # Login GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Setup image lowercase
+            # Lowercase image name
             export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
+
+            echo "🧹 Cleaning broken containers..."
+            docker compose down --remove-orphans || true
+
+            docker rm -f kelompok7_app_1 || true
+            docker rm -f kelompok7_db_1 || true
+
+            echo "🧹 Cleaning Docker cache..."
+            docker system prune -af || true
 
             echo "📦 Pulling latest images..."
             docker compose pull
-
-            echo "🧹 Cleaning old containers..."
-            docker rm -f kelompok7_app_1 || true
-            docker rm -f kelompok7_db_1 || true
 
             echo "♻️ Starting fresh containers..."
             docker compose up -d --force-recreate
