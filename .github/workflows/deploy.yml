@@ -135,7 +135,16 @@ jobs:
             docker-compose up -d --force-recreate
 
             echo "⏳ Waiting database..."
-            sleep 20
+
+            for i in $(seq 1 60); do
+              if docker-compose exec -T db mysqladmin ping -h localhost -uroot -p${DB_PASSWORD:-rootpassword} --silent; then
+                echo "✅ Database ready!"
+                break
+              fi
+
+              echo "⌛ Waiting MySQL..."
+              sleep 2
+            done
 
             echo "📂 Run migrations..."
             docker-compose exec -T app php artisan migrate --force --no-interaction
