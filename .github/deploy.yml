@@ -103,14 +103,19 @@ jobs:
 
             cd ~/RPL2D-kelompok-7
 
+            # Hapus docker-compose v1 lama (PENTING)
+            sudo rm -f /usr/bin/docker-compose || true
+
             # Install Docker Compose v2 jika belum ada
             if ! docker compose version > /dev/null 2>&1; then
               echo "📦 Installing Docker Compose v2..."
 
               sudo apt-get update
-              sudo apt-get remove -y docker-compose || true
               sudo apt-get install -y docker-compose-plugin
             fi
+
+            echo "🐳 Docker version:"
+            docker --version
 
             echo "🐳 Docker Compose version:"
             docker compose version

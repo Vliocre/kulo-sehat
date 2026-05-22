@@ -100,43 +100,67 @@ jobs:
           port: 8022
           script: |
             set -e
-            echo "🚀 Start deployment..."
 
-            # Login ke GHCR
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "🚀 Mulai deployment..."
 
-            # Masuk ke folder project (pastikan folder sudah ada)
-            mkdir -p ~/RPL2D-kelompok-7
             cd ~/RPL2D-kelompok-7
 
-            # Variabel Image (lowercase agar tidak error di docker)
-            export APP_IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
-            export COMPOSE_PROJECT_NAME=kelompok7
+            # Hapus docker-compose v1 lama (PENTING)
+            sudo rm -f /usr/bin/docker-compose || true
+
+            # Install Docker Compose v2 jika belum ada
+            if ! docker compose version > /dev/null 2>&1; then
+              echo "📦 Installing Docker Compose v2..."
+
+              sudo apt-get update
+              sudo apt-get install -y docker-compose-plugin
+            fi
+
+            echo "🐳 Docker version:"
+            docker --version
+
+            echo "🐳 Docker Compose version:"
+            docker compose version
+
+            # Login GHCR
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Lowercase image name
+            export APP_IMAGE=$(echo "ghcr.io/${{ github.repository }}:latest" | tr '[:upper:]' '[:lower:]')
+
+            echo "🧹 Cleaning broken containers..."
+            docker compose down --remove-orphans || true
+
+            docker rm -f kelompok7_app_1 || true
+            docker rm -f kelompok7_db_1 || true
+
+            echo "🧹 Cleaning Docker cache..."
+            docker system prune -af || true
 
             echo "📦 Pulling latest images..."
-            docker-compose pull
+            docker compose pull
 
-            echo "♻️ Restarting stack..."
-            # Menggunakan docker-compose (dengan tanda hubung)
-            docker-compose up -d --remove-orphans
+            echo "♻️ Starting fresh containers..."
+            docker compose up -d --force-recreate
 
             echo "⏳ Waiting for database..."
-            # Menunggu DB siap (MySQL)
+
             for i in $(seq 1 30); do
-              if docker-compose exec -T db mysqladmin ping -h localhost --silent; then
+              if docker compose exec -T db mysqladmin ping -h localhost --silent; then
                 echo "✅ Database ready."
                 break
               fi
+
               echo "Still waiting for DB..."
               sleep 2
             done
 
             echo "📂 Running migrations..."
-            docker-compose exec -T app php artisan migrate --force --no-interaction
+            docker compose exec -T app php artisan migrate --force --no-interaction
 
-            echo "🧹 Clearing & Optimizing Cache..."
-            docker-compose exec -T app php artisan config:cache
-            docker-compose exec -T app php artisan route:cache
-            docker-compose exec -T app php artisan view:cache
+            echo "🧹 Optimizing Laravel..."
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
 
-            echo "✅ Deployment finished successfully!"
+            echo "✅ Deployment selesai!"
