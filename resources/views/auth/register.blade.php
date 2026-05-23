@@ -107,6 +107,18 @@
                 </div>
 
             </form>
+
+            <div class="my-6 flex items-center gap-3">
+                <div class="h-px flex-1 bg-gray-200"></div>
+                <span class="text-xs font-medium uppercase tracking-wide text-gray-400">atau</span>
+                <div class="h-px flex-1 bg-gray-200"></div>
+            </div>
+
+            <a href="{{ route('auth.google.redirect') }}"
+               class="inline-flex w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-white text-sm font-bold text-blue-600">G</span>
+                Daftar dengan Google
+            </a>
         </div>
     </div>
 </div>

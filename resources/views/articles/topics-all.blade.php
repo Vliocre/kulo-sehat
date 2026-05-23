@@ -36,7 +36,7 @@
                 @php
                     $items = $topicsByCategory[$slug] ?? [];
                 @endphp
-                <div class="space-y-4">
+                <div id="category-{{ $slug }}" class="space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{{ $name }}</p>

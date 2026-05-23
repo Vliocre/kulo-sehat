@@ -243,6 +243,17 @@
                                     Lihat Panduan
                                 </a>
                             </div>
+                            @if(!empty($topicCategories))
+                                <div class="mt-4">
+                                    <label class="block text-sm font-semibold text-white mb-2">Pilih Kategori Panduan</label>
+                                    <select id="topic-category-select" onchange="if(this.value) window.location='{{ route('topics.all') }}' + '#category-' + this.value" class="rounded-2xl border border-white/20 bg-white/10 text-white px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-300">
+                                        <option value="" selected disabled>Pilih kategori (mis. Bayi)</option>
+                                        @foreach($topicCategories as $slug => $label)
+                                            <option value="{{ $slug }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

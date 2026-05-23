@@ -20,6 +20,9 @@ class Article extends Model
         'category_id',  // Foreign key
     ];
 
+    // Tambahkan atribut yang selalu disertakan dalam array/json
+    protected $appends = ['image_url'];
+
     /**
      * Mendefinisikan relasi "belongsTo": Satu Artikel dimiliki oleh satu User.
      * Nama fungsi `author()` (tunggal) adalah konvensi untuk relasi belongsTo.
@@ -40,5 +43,13 @@ class Article extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Accessor untuk mendapatkan URL lengkap gambar artikel.
+     */
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
     }
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\CategoryLandingController;
 use App\Http\Controllers\TopicLandingController;
 use App\Http\Controllers\TopicsExplorerController;
 use App\Http\Controllers\AuthorProfileController;
+use App\Models\TopicGuide;
 use App\Http\Controllers\Doctor\DashboardController as DoctorDashboardController;
 use App\Http\Controllers\Doctor\ArticleController as DoctorArticleController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -57,9 +58,21 @@ Route::get('/dashboard', function () {
                                 ->latest()
                                 ->take(3)
                                 ->get();
+    // Ambil kategori topik yang tersedia di database
+    $allSlugs = TopicGuide::distinct()->pluck('category_slug')->all();
+    $categoriesMap = [
+        'bayi' => 'Bayi',
+        'remaja' => 'Remaja',
+        'dewasa' => 'Dewasa',
+        'lansia' => 'Lansia',
+    ];
+    $topicCategories = [];
+    foreach ($allSlugs as $s) {
+        $topicCategories[$s] = $categoriesMap[$s] ?? ucfirst($s);
+    }
 
-    // Mengirim variabel $latestArticles (bukan $articles)
-    return view('dashboard', compact('latestArticles'));
+    // Mengirim variabel ke view
+    return view('dashboard', compact('latestArticles', 'topicCategories'));
     // === AKHIR PERUBAHAN ===
 
 })->middleware(['auth', 'verified'])->name('dashboard');
