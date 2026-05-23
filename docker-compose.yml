@@ -1,43 +1,37 @@
-name: kelompok7
-
 services:
   app:
     image: ${APP_IMAGE:-ghcr.io/vliocre/kulo-sehat:latest}
-    build:
-      context: .
+    # HAPUS bagian 'build:', karena kita menarik image yang sudah jadi dari GHCR
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8087:80"
-    environment:
-      APP_ENV: ${APP_ENV:-production}
-      APP_DEBUG: ${APP_DEBUG:-false}
-      APP_URL: ${APP_URL:-https://kulosehat.site}
-      APP_KEY: ${APP_KEY}
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      - "8087:80" # HAPUS '127.0.0.1' agar bisa diakses lewat IP Publik VPS
+    env_file: # Gunakan env_file agar lebih rapi dan tidak error "variable not set"
+      - .env
     depends_on:
       - db
+    networks:
+      - app-network
 
   db:
     image: mysql:8.0
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword} # Gunakan variabel dari .env
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -prootpassword --silent || exit 1"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${DB_PASSWORD} --silent || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 20
       start_period: 15s
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - app-network
 
 volumes:
   db_data:
+
+networks:
+  app-network:
