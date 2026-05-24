@@ -1,11 +1,11 @@
 services:
   app:
     image: ${APP_IMAGE:-ghcr.io/vliocre/kulo-sehat:latest}
-    # HAPUS bagian 'build:', karena kita menarik image yang sudah jadi dari GHCR
-    restart: unless-stopped
+    container_name: laravel_app
+    restart: always
     ports:
-      - "8087:80" # HAPUS '127.0.0.1' agar bisa diakses lewat IP Publik VPS
-    env_file: # Gunakan env_file agar lebih rapi dan tidak error "variable not set"
+      - "127.0.0.1:8080:80"
+    env_file:
       - .env
     depends_on:
       - db
@@ -14,13 +14,17 @@ services:
 
   db:
     image: mysql:8.0
-    restart: unless-stopped
+    container_name: laravel_db
+    restart: always
     env_file:
       - .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword} # Gunakan variabel dari .env
+      MYSQL_DATABASE: ${DB_DATABASE:-kulosehat}
+      MYSQL_USER: ${DB_USERNAME:-kulosehat}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-kulosehat_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpasswordharusnyaunik}
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${DB_PASSWORD} --silent || exit 1"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${DB_ROOT_PASSWORD} --silent || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 20

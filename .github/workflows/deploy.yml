@@ -8,6 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DEPLOY_PATH: /opt/kulosehat
 
 jobs:
   test:
@@ -88,17 +89,51 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            mkdir -p /home/vlio/RPL2D-kelompok-7
+            mkdir -p ${{ env.DEPLOY_PATH }}
+            cd ${{ env.DEPLOY_PATH }}
+            APP_KEY_VALUE="${{ secrets.APP_KEY }}"
+            if [ -z "$APP_KEY_VALUE" ] && [ -f .env ]; then
+              APP_KEY_VALUE=$(grep '^APP_KEY=' .env | cut -d= -f2-)
+            fi
+            if [ -z "$APP_KEY_VALUE" ]; then
+              APP_KEY_VALUE="base64:$(openssl rand -base64 32)"
+            fi
+
+            cat > .env <<EOF
+            APP_NAME="Kulo Sehat"
+            APP_ENV=production
+            APP_KEY=${APP_KEY_VALUE}
+            APP_DEBUG=false
+            APP_URL=https://kulosehat.site
+
+            LOG_CHANNEL=stack
+            LOG_STACK=single
+            LOG_LEVEL=debug
+
+            DB_CONNECTION=mysql
+            DB_HOST=db
+            DB_PORT=3306
+            DB_DATABASE=kulosehat
+            DB_USERNAME=kulosehat
+            DB_PASSWORD=kulosehat_password
+            DB_ROOT_PASSWORD=rootpasswordharusnyaunik
+
+            SESSION_DRIVER=database
+            SESSION_LIFETIME=120
+            CACHE_STORE=database
+            QUEUE_CONNECTION=database
+            BROADCAST_CONNECTION=log
+            FILESYSTEM_DISK=local
+            EOF
 
       - name: Upload docker-compose.yml
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          source: "docker-compose.yml"
-          target: "/home/vlio/RPL2D-kelompok-7"
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 22 -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+          scp -i ~/.ssh/deploy_key -P 22 docker-compose.yml \
+            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ env.DEPLOY_PATH }}/docker-compose.yml"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -115,17 +150,11 @@ jobs:
 
             echo "🚀 Mulai deployment..."
 
-            cd /home/vlio/RPL2D-kelompok-7
+            cd ${{ env.DEPLOY_PATH }}
 
-            # Hapus docker-compose v1 lama (PENTING)
-            sudo rm -f /usr/bin/docker-compose || true
-
-            # Install Docker Compose v2 jika belum ada
             if ! docker compose version > /dev/null 2>&1; then
-              echo "📦 Installing Docker Compose v2..."
-
-              sudo apt-get update
-              sudo apt-get install -y docker-compose-plugin
+              echo "Docker Compose v2 belum tersedia di VPS."
+              exit 1
             fi
 
             echo "🐳 Docker version:"
@@ -143,8 +172,8 @@ jobs:
             echo "🧹 Cleaning broken containers..."
             docker compose down --remove-orphans || true
 
-            docker rm -f kelompok7_app_1 || true
-            docker rm -f kelompok7_db_1 || true
+            docker rm -f laravel_app || true
+            docker rm -f laravel_db || true
 
             echo "🧹 Cleaning Docker cache..."
             docker system prune -af || true
