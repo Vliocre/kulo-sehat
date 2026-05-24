@@ -98,6 +98,14 @@ jobs:
             if [ -z "$APP_KEY_VALUE" ]; then
               APP_KEY_VALUE="base64:$(openssl rand -base64 32)"
             fi
+            GOOGLE_CLIENT_ID_VALUE="${{ secrets.GOOGLE_CLIENT_ID }}"
+            GOOGLE_CLIENT_SECRET_VALUE="${{ secrets.GOOGLE_CLIENT_SECRET }}"
+            if [ -z "$GOOGLE_CLIENT_ID_VALUE" ] && [ -f .env ]; then
+              GOOGLE_CLIENT_ID_VALUE=$(grep '^GOOGLE_CLIENT_ID=' .env | cut -d= -f2-)
+            fi
+            if [ -z "$GOOGLE_CLIENT_SECRET_VALUE" ] && [ -f .env ]; then
+              GOOGLE_CLIENT_SECRET_VALUE=$(grep '^GOOGLE_CLIENT_SECRET=' .env | cut -d= -f2-)
+            fi
 
             cat > .env <<EOF
             APP_NAME="Kulo Sehat"
@@ -118,8 +126,8 @@ jobs:
             DB_PASSWORD=kulosehat_password
             DB_ROOT_PASSWORD=rootpasswordharusnyaunik
 
-            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID_VALUE}
+            GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET_VALUE}
             GOOGLE_REDIRECT_URI=https://kulosehat.site/auth/google/callback
 
             SESSION_DRIVER=database
