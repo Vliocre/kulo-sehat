@@ -86,9 +86,9 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 8022
+          port: 22
           script: |
-            mkdir -p /home/polindra123/RPL2D-kelompok-7
+            mkdir -p /home/vlio/RPL2D-kelompok-7
 
       - name: Upload docker-compose.yml
         uses: appleboy/scp-action@v0.1.7
@@ -96,9 +96,9 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 8022
+          port: 22
           source: "docker-compose.yml"
-          target: "/home/polindra123/RPL2D-kelompok-7"
+          target: "/home/vlio/RPL2D-kelompok-7"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -106,7 +106,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 8022
+          port: 22
           timeout: 30m
           command_timeout: 60m
 
@@ -115,7 +115,7 @@ jobs:
 
             echo "🚀 Mulai deployment..."
 
-            cd /home/polindra123/RPL2D-kelompok-7
+            cd /home/vlio/RPL2D-kelompok-7
 
             # Hapus docker-compose v1 lama (PENTING)
             sudo rm -f /usr/bin/docker-compose || true
