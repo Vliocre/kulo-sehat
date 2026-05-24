@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\TopicGuide;
 
 class CategoryLandingController extends Controller
 {
@@ -77,6 +78,34 @@ class CategoryLandingController extends Controller
                 ['slug' => 'insomnia', 'label' => 'Insomnia'],
             ],
         ];
+
+        $dbCards = TopicGuide::where('category_slug', $categorySlug)
+            ->get(['topic_slug', 'title'])
+            ->mapWithKeys(function ($guide) {
+                return [$guide->topic_slug => [
+                    'slug' => $guide->topic_slug,
+                    'label' => $guide->title ?: ucfirst(str_replace('-', ' ', $guide->topic_slug)),
+                ]];
+            })
+            ->all();
+
+        if (!empty($dbCards)) {
+            $existingSlugs = collect($cardsMap[$categorySlug] ?? [])->pluck('slug')->all();
+
+            foreach ($dbCards as $slug => $card) {
+                if (in_array($slug, $existingSlugs, true)) {
+                    foreach ($cardsMap[$categorySlug] as &$existingCard) {
+                        if ($existingCard['slug'] === $slug) {
+                            $existingCard['label'] = $card['label'];
+                            break;
+                        }
+                    }
+                    unset($existingCard);
+                } else {
+                    $cardsMap[$categorySlug][] = $card;
+                }
+            }
+        }
 
         if (!isset($names[$categorySlug])) {
             abort(404);

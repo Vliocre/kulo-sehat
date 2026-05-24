@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminUserSeeder::class,
             CategorySeeder::class, // <-- TAMBAHKAN BARIS INI
+            TopicGuideSeeder::class,
         ]);
     }
 }

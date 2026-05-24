@@ -11,9 +11,11 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\KeluhanController;
+use App\Http\Controllers\Api\TopicGuideController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/auth/google', [AuthController::class, 'google']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -34,6 +36,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/{id}', [CategoryController::class, 'show']);
+
+    // Topic guides
+    Route::get('/topic-categories', [TopicGuideController::class, 'categories']);
+    Route::get('/topics', [TopicGuideController::class, 'index']);
+    Route::get('/topics/{categorySlug}', [TopicGuideController::class, 'byCategory']);
+    Route::get('/topics/{categorySlug}/{topicSlug}', [TopicGuideController::class, 'show']);
     
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);

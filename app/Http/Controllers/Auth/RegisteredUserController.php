@@ -36,10 +36,12 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'in:dokter,pengguna'],
+            'role' => ['nullable', 'in:dokter,pengguna'],
         ]);
 
-        if ($validated['role'] === 'dokter') {
+        $role = $validated['role'] ?? 'pengguna';
+
+        if ($role === 'dokter') {
             $request->session()->put(self::DOCTOR_REGISTRATION_SESSION_KEY, [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -53,7 +55,7 @@ class RegisteredUserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
+            'role' => $role,
             'doctor_verification_status' => 'not_required',
         ]);
 
