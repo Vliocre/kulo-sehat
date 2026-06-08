@@ -31,7 +31,7 @@ class ArticleController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,svg|max:10240',
             'content' => 'required|string',
         ]);
 
@@ -67,7 +67,7 @@ class ArticleController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:10240',
             'content' => 'required|string',
         ]);
 

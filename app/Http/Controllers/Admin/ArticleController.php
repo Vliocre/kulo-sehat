@@ -42,7 +42,7 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255|unique:articles',
             'category_id' => 'required|exists:categories,id',
             'content' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,svg|max:10240',
         ]);
 
         // 2. Handle upload gambar
@@ -82,7 +82,7 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'content' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:10240',
         ]);
         $data = $request->only(['title', 'category_id', 'content']);
         if ($request->hasFile('image')) {
