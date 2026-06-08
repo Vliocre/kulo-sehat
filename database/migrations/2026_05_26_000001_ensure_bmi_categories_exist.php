@@ -10,10 +10,10 @@ return new class extends Migration
         $now = now();
 
         foreach ([
-            ['name' => 'Kurus', 'slug' => 'kurus'],
-            ['name' => 'Ideal', 'slug' => 'ideal'],
-            ['name' => 'Gemuk', 'slug' => 'gemuk'],
-            ['name' => 'Obesitas', 'slug' => 'obesitas'],
+            ['name' => 'Bayi', 'slug' => 'bayi'],
+            ['name' => 'Remaja', 'slug' => 'remaja'],
+            ['name' => 'Dewasa', 'slug' => 'dewasa'],
+            ['name' => 'Lansia', 'slug' => 'lansia'],
         ] as $category) {
             $exists = DB::table('categories')
                 ->where('slug', $category['slug'])
