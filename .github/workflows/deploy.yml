@@ -210,6 +210,7 @@ jobs:
 
             echo "📂 Running migrations..."
             docker compose exec -T app php artisan migrate --force --no-interaction
+            docker compose exec -T app php artisan storage:link || true
 
             echo "🧹 Optimizing Laravel..."
             docker compose exec -T app php artisan config:cache
