@@ -13,7 +13,7 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (Category::BMI_CATEGORIES as $category) {
+        foreach (Category::ARTICLE_CATEGORIES as $category) {
             Category::updateOrCreate(
                 ['slug' => $category['slug']],
                 ['name' => $category['name']]
