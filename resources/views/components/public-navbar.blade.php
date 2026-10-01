@@ -47,6 +47,10 @@
                                class="hover:text-green-600 {{ request()->routeIs('keluhan.*') ? 'text-green-600' : 'text-gray-700' }}">
                                 Keluhan
                             </a>
+                            <a href="{{ route('doctors.index') }}"
+                               class="hover:text-green-600 {{ request()->routeIs('doctors.*', 'premium.*') ? 'text-green-600' : 'text-gray-700' }}">
+                                Pilih Dokter
+                            </a>
                         @endif
                     @endauth
 
@@ -54,7 +58,7 @@
                     @auth
                         @if(Auth::user()->isApprovedDoctor())
                             <a href="{{ route('dokter.keluhan') }}"
-                               class="hover:text-green-600 {{ request()->routeIs('dokter.keluhan') ? 'text-green-600' : 'text-gray-700' }}">
+                               class="hover:text-green-600 {{ request()->routeIs('dokter.keluhan*') ? 'text-green-600' : 'text-gray-700' }}">
                                 Keluhan Pasien
                             </a>
                         @endif

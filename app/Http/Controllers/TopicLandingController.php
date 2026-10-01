@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TopicGuide;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class TopicLandingController extends Controller
@@ -74,12 +75,21 @@ class TopicLandingController extends Controller
             $topic = $this->defaultTopic($prettyName, $categories[$categorySlug]);
         }
 
+        $isBookmarked = auth()->check()
+            ? DB::table('topic_bookmarks')
+                ->where('user_id', auth()->id())
+                ->where('category_slug', $categorySlug)
+                ->where('topic_slug', $topicSlug)
+                ->exists()
+            : false;
+
         return view('articles.topic-landing', [
             'categorySlug' => $categorySlug,
             'categoryName' => $categories[$categorySlug],
             'topicSlug' => $topicSlug,
             'topic' => $topic,
             'palette' => $guide->palette ?? $palettes[$topicSlug] ?? 'from-emerald-50 via-white to-emerald-100',
+            'isBookmarked' => $isBookmarked,
         ]);
     }
 

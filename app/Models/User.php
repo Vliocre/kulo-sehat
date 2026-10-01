@@ -35,6 +35,7 @@ class User extends Authenticatable
         'doctor_sip_file',
         'doctor_verification_status',
         'doctor_verified_at',
+        'premium_until',
     ];
 
     /**
@@ -58,6 +59,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'doctor_verified_at' => 'datetime',
+            'premium_until' => 'datetime',
         ];
     }
 
@@ -71,12 +73,32 @@ class User extends Authenticatable
         return $this->hasMany(Article::class);
     }
 
+    public function bookmarkedArticles()
+    {
+        return $this->belongsToMany(Article::class, 'article_bookmarks')->withTimestamps();
+    }
+
     /**
      * Relasi ke Keluhan (One-to-Many)
      */
     public function keluhans()
     {
         return $this->hasMany(Keluhan::class);
+    }
+
+    public function konsultasiDokter()
+    {
+        return $this->hasMany(Keluhan::class, 'doctor_id');
+    }
+
+    public function pesanKeluhanPremium()
+    {
+        return $this->hasMany(KeluhanPremium::class, 'sender_id');
+    }
+
+    public function hasActivePremium(): bool
+    {
+        return $this->premium_until !== null && $this->premium_until->isFuture();
     }
 
     // --- ROLE HELPERS ---

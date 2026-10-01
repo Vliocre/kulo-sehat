@@ -47,6 +47,7 @@ class UserManagementController extends Controller
             'height' => 'nullable|numeric|min:0',
             'weight' => 'nullable|numeric|min:0',
             'doctor_verification_status' => ['nullable', 'string', Rule::in(['pending', 'approved', 'rejected'])],
+            'premium_until' => ['nullable', 'date'],
         ]);
 
         $doctorStatus = $user->doctor_verification_status;
@@ -72,6 +73,9 @@ class UserManagementController extends Controller
             'weight' => $request->weight,
             'doctor_verification_status' => $doctorStatus,
             'doctor_verified_at' => $doctorVerifiedAt,
+            'premium_until' => $request->role === 'pengguna' && $request->filled('premium_until')
+                ? \Carbon\Carbon::parse($request->premium_until)->endOfDay()
+                : null,
         ]);
 
         // 3. Redirect kembali ke halaman daftar pengguna dengan pesan sukses

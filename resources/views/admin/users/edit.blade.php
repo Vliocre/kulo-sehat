@@ -87,6 +87,16 @@
                     @error('doctor_verification_status') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
             @endif
+            @if ($user->role === 'pengguna')
+                <div class="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5">
+                    <label for="premium_until" class="text-sm font-semibold text-gray-700">Masa Aktif Keluhan Premium</label>
+                    <input type="date" name="premium_until" id="premium_until"
+                           value="{{ old('premium_until', optional($user->premium_until)->format('Y-m-d')) }}"
+                           class="mt-2 w-full rounded-2xl border-gray-200 focus:border-emerald-400 focus:ring-emerald-200">
+                    <p class="mt-2 text-xs text-gray-500">Kosongkan untuk akun gratis. Premium aktif sampai akhir tanggal yang dipilih.</p>
+                    @error('premium_until') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+            @endif
             <div class="flex items-center justify-end gap-3">
                 <a href="{{ route('admin.users.index') }}" class="rounded-full border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-600 hover:border-gray-300">Batal</a>
                 <button type="submit" class="rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600">Simpan Perubahan</button>

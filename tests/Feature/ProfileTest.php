@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -10,6 +11,27 @@ test('profile page is displayed', function () {
         ->get('/profile');
 
     $response->assertOk();
+});
+
+test('symptom categories page only displays saved topics', function () {
+    $user = User::factory()->create();
+
+    DB::table('topic_bookmarks')->insert([
+        'user_id' => $user->id,
+        'category_slug' => 'bayi',
+        'topic_slug' => 'flu',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->get('/profile/gejala-penyakit');
+
+    $response
+        ->assertOk()
+        ->assertSee('Flu pada Bayi')
+        ->assertDontSee('Demam pada Bayi');
 });
 
 test('profile information can be updated', function () {

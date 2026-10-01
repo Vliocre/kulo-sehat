@@ -3,12 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KalkulatorController extends Controller
 {
     public function index()
     {
-        return view('kalkulator');
+        $weightHistories = auth()->check()
+            ? DB::table('weight_histories')
+                ->where('user_id', auth()->id())
+                ->latest('recorded_at')
+                ->take(10)
+                ->get()
+            : collect();
+
+        return view('kalkulator', compact('weightHistories'));
     }
 
     public function calculate(Request $request)
@@ -23,39 +32,50 @@ class KalkulatorController extends Controller
         $bmi = $data['berat'] / ($heightMeters * $heightMeters);
         $bmiRounded = round($bmi, 1);
 
-        [$label, $badgeClass, $note] = $this->bmiCategory($bmi);
+        [$label, $badgeClass, $note, $articleSlug] = $this->bmiCategory($bmi);
 
-        $resultHtml = sprintf(
-            '<div class="d-flex flex-column gap-2">
-                <div class="fw-bold fs-5">BMI Anda: %s</div>
-                <div class="d-inline-flex align-items-center gap-2">
-                    <span class="badge %s">%s</span>
-                    <span class="text-muted">(%s)</span>
-                </div>
-             </div>',
-            $bmiRounded,
-            $badgeClass,
-            $label,
-            $note
+        if ($request->user()) {
+            DB::table('weight_histories')->insert([
+                'user_id' => $request->user()->id,
+                'height' => $data['tinggi'],
+                'weight' => $data['berat'],
+                'bmi' => $bmiRounded,
+                'bmi_category' => $label,
+                'notes' => $note,
+                'recorded_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return back()->withInput()->with('bmi_result', [
+            'bmi' => $bmiRounded,
+            'category' => $label,
+            'badge_class' => $badgeClass,
+            'note' => $note,
+            'article_slug' => $articleSlug,
+        ])->with(
+            'success',
+            $request->user()
+                ? 'Riwayat berat badan berhasil disimpan.'
+                : 'BMI berhasil dihitung. Login untuk menyimpan riwayat berat badan.'
         );
-
-        return back()->withInput()->with('hasil', $resultHtml);
     }
 
     private function bmiCategory(float $bmi): array
     {
         if ($bmi < 18.5) {
-            return ['Berat Badan Rendah', 'bg-info', 'Perlu meningkatkan asupan gizi'];
+            return ['Kurus', 'bg-sky-400', 'Perlu meningkatkan asupan gizi secara sehat', 'kurus'];
         }
 
         if ($bmi < 25) {
-            return ['Normal', 'bg-success', 'Pertahankan pola hidup sehat'];
+            return ['Ideal', 'bg-emerald-500', 'Pertahankan pola hidup sehat', 'ideal'];
         }
 
         if ($bmi < 30) {
-            return ['Berat Badan Berlebih', 'bg-warning text-dark', 'Mulai atur pola makan dan aktivitas'];
+            return ['Gemuk', 'bg-yellow-400', 'Mulai atur pola makan dan aktivitas', 'gemuk'];
         }
 
-        return ['Obesitas', 'bg-danger', 'Disarankan konsultasi dengan ahli'];
+        return ['Obesitas', 'bg-rose-400', 'Disarankan konsultasi dengan ahli', 'obesitas'];
     }
 }

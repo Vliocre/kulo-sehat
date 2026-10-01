@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Article;
+use App\Models\Keluhan;
 
 // Import Controller
 use App\Http\Controllers\ProfileController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\KalkulatorController;
 // RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/kalkulator', [KalkulatorController::class, 'index'])->name('kalkulator.public.index');
+Route::post('/kalkulator', [KalkulatorController::class, 'calculate'])->name('kalkulator');
 Route::get('/artikel', [ArticleController::class, 'index'])->middleware('auth')->name('articles.public.index');
 Route::get('/artikel/{article:slug}', [ArticleController::class, 'show'])->middleware('auth')->name('articles.public.show');
 Route::get('/kategori/{slug}', [CategoryLandingController::class, 'show'])->middleware('auth')->name('categories.show');
@@ -58,6 +60,12 @@ Route::get('/dashboard', function () {
                                 ->latest()
                                 ->take(3)
                                 ->get();
+    $activePremiumConsultation = Keluhan::with('doctor:id,name,specialty')
+        ->where('user_id', $user->id)
+        ->where('jenis', 'premium')
+        ->whereIn('premium_status', ['requested', 'active'])
+        ->latest()
+        ->first();
     // Ambil kategori topik yang tersedia di database
     $allSlugs = TopicGuide::distinct()->pluck('category_slug')->all();
     $categoriesMap = [
@@ -72,16 +80,25 @@ Route::get('/dashboard', function () {
     }
 
     // Mengirim variabel ke view
-    return view('dashboard', compact('latestArticles', 'topicCategories'));
+    return view('dashboard', compact(
+        'latestArticles',
+        'topicCategories',
+        'activePremiumConsultation'
+    ));
     // === AKHIR PERUBAHAN ===
 
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/artikel-tersimpan', [ProfileController::class, 'savedArticles'])->name('profile.saved-articles');
+    Route::get('/profile/gejala-penyakit', [ProfileController::class, 'symptomCategories'])->name('profile.symptoms');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/kalkulator', [KalkulatorController::class, 'calculate'])->name('kalkulator');
+    Route::post('/artikel/{article:slug}/simpan', [ArticleController::class, 'bookmark'])->name('articles.bookmark');
+    Route::delete('/artikel/{article:slug}/simpan', [ArticleController::class, 'unbookmark'])->name('articles.unbookmark');
+    Route::post('/kategori/{category}/{topic}/simpan', [ProfileController::class, 'bookmarkTopic'])->name('topics.bookmark');
+    Route::delete('/kategori/{category}/{topic}/simpan', [ProfileController::class, 'unbookmarkTopic'])->name('topics.unbookmark');
 });
 
 
@@ -122,12 +139,24 @@ require __DIR__.'/auth.php';
 // keluhan
 use App\Http\Controllers\KeluhanController;
 
-Route::middleware('auth')->group(function(){
+Route::middleware(['auth', 'verified', 'role:pengguna'])->group(function(){
 
     // USER
     Route::get('/keluhan', 
         [KeluhanController::class,'indexUser'])
         ->name('keluhan.index');
+
+    Route::get('/pilih-dokter',
+        [KeluhanController::class, 'indexDoctors'])
+        ->name('doctors.index');
+
+    Route::get('/daftar-premium',
+        [KeluhanController::class, 'premiumRegistration'])
+        ->name('premium.register');
+
+    Route::post('/daftar-premium',
+        [KeluhanController::class, 'activatePremium'])
+        ->name('premium.activate');
 
     Route::post('/keluhan', 
         [KeluhanController::class,'store'])
@@ -136,10 +165,14 @@ Route::middleware('auth')->group(function(){
     Route::delete('/keluhan/{keluhan}',
         [KeluhanController::class, 'destroy'])
         ->name('keluhan.destroy');
+
+    Route::post('/keluhan-premium/dokter/{doctor}',
+        [KeluhanController::class, 'storePremium'])
+        ->name('keluhan.premium.store');
 });
 
 // DOKTER
-Route::middleware(['auth', 'role:dokter'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:dokter'])->group(function () {
     Route::get('/dokter/keluhan',
         [KeluhanController::class, 'indexDokter'])
         ->name('dokter.keluhan');
@@ -147,6 +180,28 @@ Route::middleware(['auth', 'role:dokter'])->group(function () {
     Route::post('/dokter/keluhan/{keluhan}',
         [KeluhanController::class, 'jawab'])
         ->name('dokter.keluhan.jawab');
+
+    Route::patch('/dokter/keluhan-premium/{keluhan}/terima',
+        [KeluhanController::class, 'acceptPremium'])
+        ->name('dokter.keluhan-premium.accept');
+
+    Route::patch('/dokter/keluhan-premium/{keluhan}/tolak',
+        [KeluhanController::class, 'rejectPremium'])
+        ->name('dokter.keluhan-premium.reject');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/keluhan-premium/{keluhan}/pesan',
+        [KeluhanController::class, 'sendPremiumMessage'])
+        ->name('keluhan.premium.message');
+
+    Route::get('/keluhan-premium/{keluhan}/lampiran/{message}',
+        [KeluhanController::class, 'premiumAttachment'])
+        ->name('keluhan.premium.attachment');
+
+    Route::patch('/keluhan-premium/{keluhan}/selesai',
+        [KeluhanController::class, 'closePremium'])
+        ->name('keluhan.premium.close');
 });
 
 // ADMIN

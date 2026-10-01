@@ -45,6 +45,11 @@ class Article extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function bookmarkedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'article_bookmarks')->withTimestamps();
+    }
+
     /**
      * Accessor untuk mendapatkan URL lengkap gambar artikel.
      */

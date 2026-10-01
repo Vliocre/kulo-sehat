@@ -45,6 +45,12 @@
                     {{ $article->title }}
                 </h1>
 
+                @if (session('success'))
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 @if ($article->image)
                     <div class="overflow-hidden rounded-[26px] shadow-[0_22px_60px_rgba(15,118,110,0.16)] ring-1 ring-emerald-50">
                         <img src="{{ asset('storage/' . $article->image) }}" alt="{{ $article->title }}" class="w-full h-[360px] md:h-[460px] object-cover">
@@ -54,6 +60,33 @@
                 <div class="prose prose-lg max-w-none prose-headings:text-slate-900 prose-p:text-slate-700 prose-a:text-emerald-700 prose-strong:text-slate-900 leading-relaxed">
                     {!! $article->content !!}
                 </div>
+
+                @auth
+                    <div class="flex justify-start border-t border-emerald-50 pt-6">
+                        @if ($isBookmarked)
+                            <form method="POST" action="{{ route('articles.unbookmark', $article->slug) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-5 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Hapus dari Simpanan
+                                </button>
+                            </form>
+                        @else
+                            <form method="POST" action="{{ route('articles.bookmark', $article->slug) }}">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-700">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4-7 4V5z" />
+                                    </svg>
+                                    Simpan Artikel
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @endauth
 
                 @if ($recommendedArticles->isNotEmpty())
                     <div class="pt-6 border-t border-emerald-50">

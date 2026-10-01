@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ArticleController extends Controller
 {
@@ -56,6 +57,12 @@ class ArticleController extends Controller
         abort_if($article->status !== 'published', 404);
 
         $article->load(['author', 'category']);
+        $isBookmarked = auth()->check()
+            ? DB::table('article_bookmarks')
+                ->where('user_id', auth()->id())
+                ->where('article_id', $article->id)
+                ->exists()
+            : false;
 
         $recommendedArticles = Article::where('status', 'published')
             ->where('id', '!=', $article->id)
@@ -66,6 +73,34 @@ class ArticleController extends Controller
             ->take(5)
             ->get();
 
-        return view('articles.show', compact('article', 'recommendedArticles'));
+        return view('articles.show', compact('article', 'recommendedArticles', 'isBookmarked'));
+    }
+
+    public function bookmark(Article $article)
+    {
+        abort_if($article->status !== 'published', 404);
+
+        DB::table('article_bookmarks')->updateOrInsert(
+            [
+                'user_id' => auth()->id(),
+                'article_id' => $article->id,
+            ],
+            [
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        return back()->with('success', 'Artikel berhasil disimpan.');
+    }
+
+    public function unbookmark(Article $article)
+    {
+        DB::table('article_bookmarks')
+            ->where('user_id', auth()->id())
+            ->where('article_id', $article->id)
+            ->delete();
+
+        return back()->with('success', 'Artikel dihapus dari simpanan.');
     }
 }

@@ -3,6 +3,11 @@
 @section('title', 'Kalkulator BMI')
 
 @section('content')
+    @php
+        $bmiResult = session('bmi_result');
+        $bmiProgress = $bmiResult ? min(($bmiResult['bmi'] / 40) * 100, 100) : 0;
+    @endphp
+
     <style>
         body > div.min-h-screen > nav {
             display: none;
@@ -99,32 +104,45 @@
                         <p class="text-sm text-slate-500">Masukkan informasi untuk menghitung BMI secara akurat.</p>
                     </div>
 
-                    <div class="space-y-4">
+                    @if (session('success'))
+                        <div class="mb-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="mb-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('kalkulator') }}" class="space-y-4">
+                        @csrf
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Jenis Kelamin</label>
-                            <select id="gender" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-300 focus:outline-none bg-white">
-                                <option>Pria</option>
-                                <option>Wanita</option>
+                            <select id="gender" name="gender" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-300 focus:outline-none bg-white">
+                                <option value="Pria" @selected(old('gender') === 'Pria')>Pria</option>
+                                <option value="Wanita" @selected(old('gender') === 'Wanita')>Wanita</option>
                             </select>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Tinggi Badan (cm)</label>
-                            <input type="number" id="tinggi" placeholder="Contoh: 170"
+                            <input type="number" id="tinggi" name="tinggi" value="{{ old('tinggi') }}" placeholder="Contoh: 170"
                                 class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-300 focus:outline-none">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Berat Badan (kg)</label>
-                            <input type="number" id="berat" placeholder="Contoh: 65"
+                            <input type="number" id="berat" name="berat" value="{{ old('berat') }}" placeholder="Contoh: 65"
                                 class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-300 focus:outline-none">
                         </div>
 
-                        <button onclick="hitungBMI()"
+                        <button type="submit"
                             class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-semibold transition duration-300 transform hover:-translate-y-0.5">
-                            Hitung BMI
+                            Hitung dan Simpan BMI
                         </button>
-                    </div>
+                    </form>
                 </div>
 
                 <div class="space-y-6 bmi-fade-up delay-3">
@@ -141,30 +159,80 @@
                         </div>
                     </div>
 
-                    <div id="resultCard" class="bmi-card p-6 text-center opacity-0 scale-95 transition-all duration-500">
+                    <div id="resultCard" class="bmi-card p-6 text-center transition-all duration-500 {{ $bmiResult ? 'opacity-100 scale-100' : 'opacity-0 scale-95' }}">
                         <h2 class="text-lg font-semibold mb-2 text-slate-700">Hasil Anda</h2>
-                        <div id="bmiValue" class="text-4xl font-bold text-emerald-600 mb-1">0</div>
-                        <div id="kategori" class="text-sm font-medium text-slate-500 mb-4">-</div>
+                        <div id="bmiValue" class="text-4xl font-bold text-emerald-600 mb-1">{{ $bmiResult['bmi'] ?? '0' }}</div>
+                        <div id="kategori" class="text-sm font-medium text-slate-500 mb-4">{{ $bmiResult['category'] ?? '-' }}</div>
 
                         <div class="w-full bg-slate-200 rounded-full h-3">
                             <div id="progressBar"
-                                class="h-3 rounded-full bg-emerald-500 transition-all duration-700"
-                                style="width:0%">
+                                class="h-3 rounded-full transition-all duration-700 {{ $bmiResult['badge_class'] ?? 'bg-emerald-500' }}"
+                                style="width:{{ $bmiProgress }}%">
                             </div>
                         </div>
 
                         <div class="mt-5 rounded-2xl bg-slate-50 px-4 py-4 text-left">
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Rekomendasi Artikel</p>
                             <p id="messageText" class="mt-2 text-sm text-slate-600">
-                                Hitung BMI Anda terlebih dahulu untuk melihat rekomendasi artikel yang sesuai.
-                            </p>
-                            <a id="articleCta"
-                               href="{{ route('articles.public.index') }}"
+                                {{ $bmiResult['note'] ?? 'Hitung BMI Anda terlebih dahulu untuk melihat rekomendasi artikel yang sesuai.' }}
+                            </p>jhvffvd bvcxzz                                  <a id="articleCta"
+                               href="{{ $bmiResult ? route('articles.public.index', ['category' => $bmiResult['article_slug'], 'from' => 'kalkulator']) : route('articles.public.index') }}"
                                class="mt-4 inline-flex items-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">
-                                Lihat Artikel
+                                {{ $bmiResult ? 'Baca Artikel ' . $bmiResult['category'] : 'Lihat Artikel' }}
                             </a>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="bmi-card p-6 bmi-fade-up delay-3">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Riwayat Berat Badan</p>
+                        <h2 class="mt-2 text-xl font-bold text-slate-800">Catatan BMI Terbaru</h2>
+                    </div>
+                    @guest
+                        <a href="{{ route('login') }}" class="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                            Login untuk menyimpan
+                        </a>
+                    @endguest
+                </div>
+
+                <div class="mt-5 overflow-x-auto">
+                    @auth
+                        @if ($weightHistories->isNotEmpty())
+                            <table class="w-full min-w-[620px] text-left text-sm">
+                                <thead>
+                                    <tr class="border-b border-slate-100 text-xs uppercase tracking-[0.15em] text-slate-500">
+                                        <th class="py-3 pr-4">Tanggal</th>
+                                        <th class="py-3 pr-4">Tinggi</th>
+                                        <th class="py-3 pr-4">Berat</th>
+                                        <th class="py-3 pr-4">BMI</th>
+                                        <th class="py-3">Kategori</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    @foreach ($weightHistories as $history)
+                                        <tr>
+                                            <td class="py-3 pr-4 text-slate-600">{{ \Carbon\Carbon::parse($history->recorded_at)->isoFormat('D MMM YYYY, HH:mm') }}</td>
+                                            <td class="py-3 pr-4 font-semibold text-slate-800">{{ number_format($history->height, 0) }} cm</td>
+                                            <td class="py-3 pr-4 font-semibold text-slate-800">{{ number_format($history->weight, 1) }} kg</td>
+                                            <td class="py-3 pr-4 font-bold text-emerald-700">{{ number_format($history->bmi, 1) }}</td>
+                                            <td class="py-3 text-slate-600">{{ $history->bmi_category }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <div class="rounded-2xl border border-dashed border-emerald-100 bg-emerald-50/50 px-4 py-6 text-sm text-slate-600">
+                                Belum ada riwayat. Isi form di atas untuk menyimpan berat badan pertama Anda.
+                            </div>
+                        @endif
+                    @else
+                        <div class="rounded-2xl border border-dashed border-emerald-100 bg-emerald-50/50 px-4 py-6 text-sm text-slate-600">
+                            Kalkulator bisa dibuka semua pengunjung, tetapi riwayat berat badan hanya tersimpan setelah login.
+                        </div>
+                    @endauth
                 </div>
             </div>
         </div>

@@ -53,6 +53,11 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                         </a>
                     </div>
+                    @if (session('success'))
+                        <div class="rounded-2xl border border-emerald-100 bg-white/80 px-4 py-3 text-sm font-semibold text-emerald-700">
+                            {{ session('success') }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>
@@ -112,6 +117,35 @@
                 </div>
             </section>
         @endif
+
+        @auth
+            <section class="relative max-w-6xl mx-auto px-6 lg:px-8 mt-8">
+                <div class="border-t border-emerald-100 pt-6">
+                    @if ($isBookmarked)
+                        <form method="POST" action="{{ route('topics.unbookmark', ['category' => $categorySlug, 'topic' => $topicSlug]) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-5 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Hapus dari Simpanan
+                            </button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('topics.bookmark', ['category' => $categorySlug, 'topic' => $topicSlug]) }}">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-700">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4-7 4V5z" />
+                                </svg>
+                                Simpan Gejala Penyakit
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </section>
+        @endauth
     </main>
 
     <footer class="relative mt-16 bg-slate-900 text-slate-100">

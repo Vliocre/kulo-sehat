@@ -72,6 +72,16 @@
                 <!-- TOGGLE SECTION -->
                 <div x-data="{ openSecurity: false, openDelete: false }" class="space-y-4 mt-8">
 
+                    <a href="{{ route('profile.saved-articles') }}"
+                        class="block w-full px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition font-semibold">
+                        Artikel Tersimpan
+                    </a>
+
+                    <a href="{{ route('profile.symptoms') }}"
+                        class="block w-full px-5 py-3 rounded-2xl bg-sky-50 text-sky-700 hover:bg-sky-100 transition font-semibold">
+                        Kategori Gejala Penyakit
+                    </a>
+
                     <!-- BUTTON KEAMANAN -->
                     <button @click="openSecurity = !openSecurity"
                         class="w-full text-left px-5 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition font-semibold">

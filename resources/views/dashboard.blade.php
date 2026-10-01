@@ -260,6 +260,31 @@
             </div>
         </section>
 
+        {{-- Premium invitation --}}
+        <section class="max-w-6xl mx-auto px-6 lg:px-8 mb-8">
+            <div class="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-950 via-emerald-900 to-emerald-600 p-7 text-white shadow-[0_24px_65px_rgba(15,118,110,.22)] lg:p-10">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,.14),transparent_30%)]"></div>
+                <div class="relative grid gap-7 lg:grid-cols-[1fr_auto] lg:items-center">
+                    <div class="max-w-2xl">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <p class="text-xs font-semibold uppercase tracking-[.24em] text-emerald-200">Keluhan Premium</p>
+                            <span class="rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold ring-1 ring-white/20">{{ auth()->user()->hasActivePremium() ? 'Premium aktif' : 'Upgrade layanan' }}</span>
+                        </div>
+                        <h2 class="mt-3 text-2xl font-bold sm:text-3xl">Berkomunikasi lebih leluasa dengan dokter pilihan</h2>
+                        <p class="mt-3 text-sm leading-6 text-emerald-50/85">Pilih dokter terverifikasi, kirim pesan lanjutan, lampirkan gambar secara privat, dan simpan seluruh riwayat konsultasi dalam satu tempat.</p>
+                        <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-emerald-100"><span>&#10003; Chat berkelanjutan</span><span>&#10003; Lampiran privat</span><span>&#10003; Riwayat tersimpan</span></div>
+                    </div>
+                    <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                        @if($activePremiumConsultation)
+                            <a href="{{ route('keluhan.index') }}#percakapan-premium" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-emerald-800 shadow-lg transition hover:bg-emerald-50">Buka konsultasi aktif</a>
+                        @else
+                            <a href="{{ route('doctors.index') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-emerald-800 shadow-lg transition hover:bg-emerald-50">{{ auth()->user()->hasActivePremium() ? 'Pilih dokter' : 'Lihat dokter & daftar' }}<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-2">
             <div class="hospital-map-shell relative overflow-hidden rounded-[34px] p-6 lg:p-8 text-white shadow-[0_28px_80px_rgba(15,23,42,0.2)]">
                 <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.12),transparent_24%),radial-gradient(circle_at_82%_12%,rgba(56,189,248,0.14),transparent_22%)]"></div>
