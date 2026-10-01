@@ -26,6 +26,8 @@ RUN docker-php-ext-install \
     opcache \
     zip
 
+RUN printf "upload_max_filesize=10M\npost_max_size=12M\nmemory_limit=256M\n" > /usr/local/etc/php/conf.d/uploads.ini
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . .

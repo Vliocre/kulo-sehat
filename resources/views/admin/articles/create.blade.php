@@ -30,7 +30,8 @@
             </div>
             <div>
                 <label for="image" class="text-sm font-semibold text-gray-700">Gambar Utama</label>
-                <input type="file" name="image" id="image" class="mt-2 w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100" />
+                <input type="file" name="image" id="image" accept="image/jpeg,image/png,image/jpg,image/svg+xml" class="mt-2 w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100" required />
+                <p class="mt-1 text-xs text-gray-500">Format JPG, PNG, atau SVG. Maksimal 10 MB.</p>
                 @error('image') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
             <div class="flex items-center justify-end gap-3">
@@ -39,4 +40,14 @@
             </div>
         </form>
     </div>
+
+    <script>
+        document.getElementById('image')?.addEventListener('change', function () {
+            const file = this.files?.[0];
+            if (file && file.size > 10 * 1024 * 1024) {
+                alert('Ukuran gambar maksimal 10 MB.');
+                this.value = '';
+            }
+        });
+    </script>
 @endsection
