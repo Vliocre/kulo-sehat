@@ -11,8 +11,8 @@
 <x-public-navbar />
 
 @php
-    $premiumLabels = ['requested' => 'Permintaan baru', 'active' => 'Aktif', 'closed' => 'Selesai', 'rejected' => 'Ditolak'];
-    $premiumTones = ['requested' => 'bg-amber-100 text-amber-700', 'active' => 'bg-emerald-100 text-emerald-700', 'closed' => 'bg-slate-100 text-slate-600', 'rejected' => 'bg-rose-100 text-rose-700'];
+    $premiumLabels = ['requested' => 'Permintaan baru', 'active' => 'Aktif', 'paused' => 'Dijeda', 'closed' => 'Selesai', 'rejected' => 'Ditolak'];
+    $premiumTones = ['requested' => 'bg-amber-100 text-amber-700', 'active' => 'bg-emerald-100 text-emerald-700', 'paused' => 'bg-orange-100 text-orange-700', 'closed' => 'bg-slate-100 text-slate-600', 'rejected' => 'bg-rose-100 text-rose-700'];
 @endphp
 
 <main class="relative overflow-hidden pb-12 pt-28">
@@ -45,10 +45,10 @@
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="rounded-full px-3 py-1 text-xs font-bold {{ $premiumTones[$consultation->premium_status] ?? 'bg-slate-100 text-slate-600' }}">{{ $premiumLabels[$consultation->premium_status] ?? ucfirst($consultation->premium_status) }}</span>
-                                @if($consultation->premium_status === 'requested')
+                                @if($consultation->premium_status === 'requested' && $consultation->user->hasActivePremium())
                                     <form method="POST" action="{{ route('dokter.keluhan-premium.accept', $consultation) }}">@csrf @method('PATCH')<button class="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-emerald-500">Terima</button></form>
                                     <form method="POST" action="{{ route('dokter.keluhan-premium.reject', $consultation) }}" onsubmit="return confirm('Tolak permintaan konsultasi ini?');">@csrf @method('PATCH')<button class="rounded-full bg-rose-50 px-4 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-100">Tolak</button></form>
-                                @elseif($consultation->premium_status === 'active')
+                                @elseif($consultation->premium_status === 'active' && $consultation->user->hasActivePremium())
                                     <form method="POST" action="{{ route('keluhan.premium.close', $consultation) }}" onsubmit="return confirm('Selesaikan konsultasi ini?');">@csrf @method('PATCH')<button class="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-bold text-slate-600 hover:text-rose-600">Selesaikan</button></form>
                                 @endif
                             </div>
@@ -67,7 +67,7 @@
                             @endforeach
                         </div>
 
-                        @if($consultation->premium_status === 'active')
+                        @if($consultation->premium_status === 'active' && $consultation->user->hasActivePremium())
                             <form method="POST" action="{{ route('keluhan.premium.message', $consultation) }}" enctype="multipart/form-data" class="border-t border-slate-100 p-4 sm:p-5">
                                 @csrf
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -76,8 +76,10 @@
                                     <button class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-500">Kirim</button>
                                 </div>
                             </form>
-                        @elseif($consultation->premium_status === 'requested')
+                        @elseif($consultation->premium_status === 'requested' && $consultation->user->hasActivePremium())
                             <p class="border-t border-amber-100 bg-amber-50 px-5 py-4 text-sm text-amber-700">Terima permintaan untuk membuka percakapan dua arah.</p>
+                        @elseif($consultation->premium_status === 'paused' || ! $consultation->user->hasActivePremium())
+                            <p class="border-t border-orange-100 bg-orange-50 px-5 py-4 text-sm text-orange-700">Percakapan dijeda karena akun Premium pasien tidak aktif. Riwayat tetap dapat dibaca.</p>
                         @else
                             <p class="border-t border-slate-100 bg-slate-50 px-5 py-4 text-sm text-slate-500">Percakapan ini sudah ditutup dan hanya dapat dibaca.</p>
                         @endif

@@ -55,17 +55,20 @@ class KeluhanController extends Controller
             ->orderBy('name')
             ->get();
 
-        $hasActivePremium = Keluhan::where('user_id', $user->id)
+        $activePremiumConsultation = Keluhan::with('doctor:id,name')
+            ->where('user_id', $user->id)
             ->where('jenis', 'premium')
             ->whereIn('premium_status', ['requested', 'active'])
-            ->exists();
+            ->latest()
+            ->first();
 
         return view('keluhan.user', [
             'user' => $user,
             'doctors' => $doctors,
             'keluhans' => collect(),
             'premiumKeluhans' => collect(),
-            'hasActivePremium' => $hasActivePremium,
+            'hasActivePremium' => $activePremiumConsultation !== null,
+            'activePremiumConsultation' => $activePremiumConsultation,
             'pageMode' => 'doctors',
             'selectedDoctorId' => $request->integer('doctor'),
         ]);
@@ -75,44 +78,179 @@ class KeluhanController extends Controller
     {
         $user = $request->user();
 
-        if ($user->hasActivePremium()) {
-            return redirect()->route('doctors.index', array_filter([
-                'doctor' => $request->integer('doctor') ?: null,
-            ]));
+        $selectedDoctor = null;
+        if ($request->filled('doctor')) {
+            $selectedDoctor = User::query()
+                ->where('role', 'dokter')
+                ->where('doctor_verification_status', 'approved')
+                ->findOrFail($request->integer('doctor'));
         }
 
-        $selectedDoctor = User::query()
-            ->where('role', 'dokter')
-            ->where('doctor_verification_status', 'approved')
-            ->findOrFail($request->integer('doctor'));
-
-        return view('keluhan.user', [
+        return view('premium.index', [
             'user' => $user,
             'selectedDoctor' => $selectedDoctor,
-            'keluhans' => collect(),
-            'premiumKeluhans' => collect(),
-            'pageMode' => 'premium-registration',
+            'plans' => $this->premiumPlans(),
         ]);
     }
 
     public function activatePremium(Request $request)
     {
         $data = $request->validate([
-            'doctor_id' => ['required', 'integer', 'exists:users,id'],
+            'plan' => ['nullable', 'string', 'in:monthly,quarterly,yearly'],
+            'doctor_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
-        $doctor = User::query()
-            ->where('role', 'dokter')
-            ->where('doctor_verification_status', 'approved')
-            ->findOrFail($data['doctor_id']);
+        $doctor = null;
+        if (! empty($data['doctor_id'])) {
+            $doctor = User::query()
+                ->where('role', 'dokter')
+                ->where('doctor_verification_status', 'approved')
+                ->findOrFail($data['doctor_id']);
+        }
 
-        $request->user()->update([
-            'premium_until' => now()->addDays(30)->endOfDay(),
+        $planKey = $data['plan'] ?? 'monthly';
+        $plan = $this->premiumPlans()[$planKey];
+
+        $user = $request->user();
+        $wasPremiumActive = $user->hasActivePremium();
+
+        if (! $wasPremiumActive) {
+            Keluhan::where('user_id', $user->id)
+                ->where('jenis', 'premium')
+                ->whereIn('premium_status', ['requested', 'active'])
+                ->update([
+                    'premium_status' => 'paused',
+                    'premium_ended_at' => now(),
+                ]);
+        }
+
+        $premiumStartsAt = $wasPremiumActive
+            ? $user->premium_until->copy()
+            : now();
+
+        $user->update([
+            'premium_until' => $premiumStartsAt->addDays($plan['days'])->endOfDay(),
         ]);
 
         return redirect()
-            ->route('doctors.index', ['doctor' => $doctor->id])
-            ->with('ok', 'Akun Premium berhasil diaktifkan selama 30 hari. Silakan mulai konsultasi dengan dokter pilihan Anda.');
+            ->route('doctors.index', array_filter(['doctor' => $doctor?->id]))
+            ->with('ok', 'Akun Premium berhasil diaktifkan melalui paket '.$plan['name'].'. Silakan pilih dokter untuk memulai konsultasi.');
+    }
+
+    private function premiumPlans(): array
+    {
+        return [
+            'monthly' => [
+                'name' => 'Premium Bulanan',
+                'duration' => '30 hari',
+                'days' => 30,
+                'price' => 'Rp49.000',
+                'description' => 'Cocok untuk konsultasi kesehatan rutin dalam satu bulan.',
+            ],
+            'quarterly' => [
+                'name' => 'Premium 3 Bulan',
+                'duration' => '90 hari',
+                'days' => 90,
+                'price' => 'Rp129.000',
+                'description' => 'Lebih hemat untuk pendampingan kesehatan berkelanjutan.',
+                'recommended' => true,
+            ],
+            'yearly' => [
+                'name' => 'Premium Tahunan',
+                'duration' => '365 hari',
+                'days' => 365,
+                'price' => 'Rp399.000',
+                'description' => 'Akses paling lengkap untuk kebutuhan keluarga sepanjang tahun.',
+            ],
+        ];
+    }
+
+    public function premiumConversations(Request $request, ?Keluhan $keluhan = null)
+    {
+        $user = $request->user();
+
+        if ($keluhan) {
+            abort_unless($keluhan->isPremium() && $keluhan->user_id === $user->id, 403);
+        }
+
+        $conversations = Keluhan::with([
+                'doctor:id,name,specialty,workplace,about',
+                'pesanPremium.sender:id,name,role',
+            ])
+            ->where('user_id', $user->id)
+            ->where('jenis', 'premium')
+            ->latest()
+            ->limit(30)
+            ->get();
+
+        $hasCurrentConversation = $conversations->contains(
+            fn ($item) => in_array($item->premium_status, ['requested', 'active'], true)
+        );
+        $draftDoctor = null;
+        if ($user->hasActivePremium() && ! $hasCurrentConversation && $request->filled('draft_doctor')) {
+            $draftDoctor = User::query()
+                ->where('role', 'dokter')
+                ->where('doctor_verification_status', 'approved')
+                ->find($request->integer('draft_doctor'));
+        }
+
+        $conversation = $keluhan
+            ? $conversations->firstWhere('id', $keluhan->id)
+            : $conversations->first(fn ($item) => in_array($item->premium_status, ['requested', 'active'], true))
+                ?? $conversations->first();
+
+        if ($conversation) {
+            KeluhanPremium::where('keluhan_id', $conversation->id)
+                ->where('sender_id', '!=', $user->id)
+                ->whereNull('dibaca_at')
+                ->update(['dibaca_at' => now()]);
+        }
+
+        return view('premium.conversations', compact('user', 'conversations', 'conversation', 'draftDoctor'))
+            ->with('showDraft', false);
+    }
+
+    public function startPremiumConversation(Request $request, User $doctor)
+    {
+        $user = $request->user();
+        abort_unless($doctor->isApprovedDoctor(), 404);
+
+        if (! $user->hasActivePremium()) {
+            return redirect()->route('premium.register', ['doctor' => $doctor->id])
+                ->withErrors(['premium' => 'Aktifkan akun Premium sebelum memulai percakapan.']);
+        }
+
+        $activeConversation = Keluhan::where('user_id', $user->id)
+            ->where('jenis', 'premium')
+            ->whereIn('premium_status', ['requested', 'active'])
+            ->latest()
+            ->first();
+
+        if ($activeConversation) {
+            if ($activeConversation->doctor_id === $doctor->id) {
+                return redirect()->route('premium.conversations.show', $activeConversation);
+            }
+
+            return redirect()->route('doctors.index')
+                ->withErrors([
+                    'premium' => 'Premium Anda sedang terhubung dengan '.$activeConversation->doctor->name.'. Nonaktifkan Premium atau selesaikan periodenya untuk memilih dokter lain.',
+                ]);
+        }
+
+        $conversations = Keluhan::with('doctor:id,name,specialty,workplace')
+            ->where('user_id', $user->id)
+            ->where('jenis', 'premium')
+            ->latest()
+            ->limit(30)
+            ->get();
+
+        return view('premium.conversations', [
+            'user' => $user,
+            'conversations' => $conversations,
+            'conversation' => null,
+            'draftDoctor' => $doctor,
+            'showDraft' => true,
+        ]);
     }
 
    public function store(Request $r)
@@ -222,7 +360,7 @@ class KeluhanController extends Controller
         $data = $request->validate([
             'judul' => ['required', 'string', 'max:150'],
             'pesan' => ['required', 'string', 'max:5000'],
-            'gambar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'gambar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         $hasActiveConsultation = Keluhan::where('user_id', $user->id)
@@ -237,7 +375,7 @@ class KeluhanController extends Controller
         $imagePath = $request->file('gambar')?->store('keluhan-premium', 'local');
 
         try {
-            DB::transaction(function () use ($data, $doctor, $user, $imagePath) {
+            $keluhan = DB::transaction(function () use ($data, $doctor, $user, $imagePath) {
                 User::lockForUpdate()->findOrFail($user->id);
 
                 if (Keluhan::where('user_id', $user->id)
@@ -264,6 +402,8 @@ class KeluhanController extends Controller
                     'pesan' => $data['pesan'],
                     'gambar' => $imagePath,
                 ]);
+
+                return $keluhan;
             });
         } catch (\Throwable $exception) {
             if ($imagePath) {
@@ -273,12 +413,14 @@ class KeluhanController extends Controller
             throw $exception;
         }
 
-        return redirect()->route('keluhan.index')->with('ok', 'Permintaan Keluhan Premium berhasil dikirim ke dokter.');
+        return redirect()->route('premium.conversations.show', $keluhan)
+            ->with('ok', 'Permintaan konsultasi berhasil dikirim. Ruang percakapan Anda telah dibuat.');
     }
 
     public function acceptPremium(Request $request, Keluhan $keluhan)
     {
         $this->authorizePremiumDoctor($request, $keluhan);
+        abort_unless($keluhan->user?->hasActivePremium(), 409, 'Akun Premium pasien sedang tidak aktif.');
 
         DB::transaction(function () use ($keluhan) {
             $lockedKeluhan = Keluhan::lockForUpdate()->findOrFail($keluhan->id);
@@ -311,11 +453,22 @@ class KeluhanController extends Controller
     public function sendPremiumMessage(Request $request, Keluhan $keluhan)
     {
         $this->authorizePremiumParticipant($request, $keluhan);
-        abort_unless($keluhan->premium_status === 'active', 409, 'Percakapan ini tidak sedang aktif.');
+        abort_unless(
+            $keluhan->user?->hasActivePremium(),
+            403,
+            'Akun Premium pasien tidak aktif. Percakapan hanya dapat dibaca.'
+        );
+        $canSendWhileWaiting = $keluhan->premium_status === 'requested'
+            && $keluhan->user_id === $request->user()->id;
+        abort_unless(
+            $keluhan->premium_status === 'active' || $canSendWhileWaiting,
+            409,
+            'Percakapan ini tidak sedang aktif.'
+        );
 
         $data = $request->validate([
             'pesan' => ['nullable', 'required_without:gambar', 'string', 'max:5000'],
-            'gambar' => ['nullable', 'required_without:pesan', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'gambar' => ['nullable', 'required_without:pesan', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         $imagePath = $request->file('gambar')?->store('keluhan-premium', 'local');

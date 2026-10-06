@@ -276,9 +276,9 @@
                     </div>
                     <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
                         @if($activePremiumConsultation)
-                            <a href="{{ route('keluhan.index') }}#percakapan-premium" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-emerald-800 shadow-lg transition hover:bg-emerald-50">Buka konsultasi aktif</a>
+                            <a href="{{ route('premium.conversations.show', $activePremiumConsultation) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-emerald-800 shadow-lg transition hover:bg-emerald-50">Buka konsultasi aktif</a>
                         @else
-                            <a href="{{ route('doctors.index') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-emerald-800 shadow-lg transition hover:bg-emerald-50">{{ auth()->user()->hasActivePremium() ? 'Pilih dokter' : 'Lihat dokter & daftar' }}<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></a>
+                            <a href="{{ route('premium.register') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-emerald-800 shadow-lg transition hover:bg-emerald-50">Buat Akun<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></a>
                         @endif
                     </div>
                 </div>

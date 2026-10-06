@@ -72,6 +72,20 @@ test('email verification status is unchanged when the email address is unchanged
     $this->assertNotNull($user->refresh()->email_verified_at);
 });
 
+test('user can deactivate premium without deleting their account', function () {
+    $user = User::factory()->create([
+        'premium_until' => now()->addMonth(),
+    ]);
+
+    $this->actingAs($user)
+        ->patch(route('profile.premium.deactivate'))
+        ->assertSessionHas('status', 'premium-deactivated')
+        ->assertRedirect(route('profile.edit'));
+
+    $this->assertNull($user->fresh()->premium_until);
+    $this->assertAuthenticatedAs($user);
+});
+
 test('user can delete their account', function () {
     $user = User::factory()->create();
 

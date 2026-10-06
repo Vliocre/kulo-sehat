@@ -60,12 +60,14 @@ Route::get('/dashboard', function () {
                                 ->latest()
                                 ->take(3)
                                 ->get();
-    $activePremiumConsultation = Keluhan::with('doctor:id,name,specialty')
-        ->where('user_id', $user->id)
-        ->where('jenis', 'premium')
-        ->whereIn('premium_status', ['requested', 'active'])
-        ->latest()
-        ->first();
+    $activePremiumConsultation = $user->hasActivePremium()
+        ? Keluhan::with('doctor:id,name,specialty')
+            ->where('user_id', $user->id)
+            ->where('jenis', 'premium')
+            ->whereIn('premium_status', ['requested', 'active'])
+            ->latest()
+            ->first()
+        : null;
     // Ambil kategori topik yang tersedia di database
     $allSlugs = TopicGuide::distinct()->pluck('category_slug')->all();
     $categoriesMap = [
@@ -94,6 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/artikel-tersimpan', [ProfileController::class, 'savedArticles'])->name('profile.saved-articles');
     Route::get('/profile/gejala-penyakit', [ProfileController::class, 'symptomCategories'])->name('profile.symptoms');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/premium/nonaktifkan', [ProfileController::class, 'deactivatePremium'])->name('profile.premium.deactivate');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/artikel/{article:slug}/simpan', [ArticleController::class, 'bookmark'])->name('articles.bookmark');
     Route::delete('/artikel/{article:slug}/simpan', [ArticleController::class, 'unbookmark'])->name('articles.unbookmark');
@@ -157,6 +160,19 @@ Route::middleware(['auth', 'verified', 'role:pengguna'])->group(function(){
     Route::post('/daftar-premium',
         [KeluhanController::class, 'activatePremium'])
         ->name('premium.activate');
+
+    Route::get('/percakapan-premium',
+        [KeluhanController::class, 'premiumConversations'])
+        ->name('premium.conversations.index');
+
+    Route::get('/percakapan-premium/dokter/{doctor}/baru',
+        [KeluhanController::class, 'startPremiumConversation'])
+        ->name('premium.conversations.start');
+
+    Route::get('/percakapan-premium/{keluhan}',
+        [KeluhanController::class, 'premiumConversations'])
+        ->whereNumber('keluhan')
+        ->name('premium.conversations.show');
 
     Route::post('/keluhan', 
         [KeluhanController::class,'store'])

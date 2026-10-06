@@ -149,28 +149,35 @@
                         <div x-data="{ open:false }" class="relative" @click.away="open=false">
 
                             <button @click="open=!open"
-                                class="border px-4 h-10 rounded-full text-sm font-semibold hover:border-green-300 hover:text-green-600">
-                                {{ Auth::user()->name }}
+                                class="flex h-10 max-w-[210px] items-center gap-2 rounded-full border px-3.5 text-sm font-semibold transition {{ Auth::user()->hasActivePremium() ? 'border-amber-300 bg-white ring-2 ring-amber-100 hover:border-amber-400 hover:text-amber-700' : 'hover:border-green-300 hover:text-green-600' }}">
+                                <span class="truncate">{{ Auth::user()->name }}</span>
+                                @if(Auth::user()->hasActivePremium())
+                                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none tracking-[.08em] text-amber-700">
+                                        <svg class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M3.5 8.5 7 4h10l3.5 4.5L12 20 3.5 8.5Z" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                                        Premium
+                                    </span>
+                                @endif
+                                <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
                             </button>
 
-                            <div x-show="open" x-cloak
-                                 class="absolute right-0 z-[60] mt-2 w-48 bg-white rounded-xl shadow-lg py-1">
+                            <div x-show="open" x-cloak x-transition.origin.top.right
+                                 class="absolute right-0 top-full z-[70] mt-2 w-44 overflow-hidden rounded-2xl border border-slate-100 bg-white/95 py-1.5 shadow-[0_16px_40px_rgba(15,23,42,.16)] backdrop-blur-sm">
 
                                 <a href="{{ route('profile.edit') }}"
-                                   class="block px-4 py-2 hover:bg-gray-100">
+                                   class="block px-4 py-2.5 text-sm hover:bg-emerald-50 hover:text-emerald-700">
                                     Profil
                                 </a>
 
                                 @if(Auth::user()->isApprovedDoctor())
                                     <a href="{{ route('doctor.articles.index') }}"
-                                       class="block px-4 py-2 hover:bg-gray-100">
+                                       class="block px-4 py-2.5 text-sm hover:bg-emerald-50 hover:text-emerald-700">
                                         Kelola Artikel
                                     </a>
                                 @endif
 
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form method="POST" action="{{ route('logout') }}" class="border-t border-slate-100">
                                     @csrf
-                                    <button class="w-full text-left px-4 py-2 hover:bg-gray-100">
+                                    <button class="w-full px-4 py-2.5 text-left text-sm text-slate-600 hover:bg-rose-50 hover:text-rose-600">
                                         Logout
                                     </button>
                                 </form>

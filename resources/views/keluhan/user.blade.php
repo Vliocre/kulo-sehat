@@ -19,8 +19,8 @@
     $menunggu = $keluhans->where('status', 'menunggu')->count();
     $dijawab = $keluhans->where('status', 'dijawab')->count();
     $hasActivePremium = $hasActivePremium ?? $premiumKeluhans->whereIn('premium_status', ['requested', 'active'])->isNotEmpty();
-    $premiumLabels = ['requested' => 'Menunggu dokter', 'active' => 'Sedang aktif', 'closed' => 'Selesai', 'rejected' => 'Ditolak'];
-    $premiumTones = ['requested' => 'bg-amber-100 text-amber-700', 'active' => 'bg-emerald-100 text-emerald-700', 'closed' => 'bg-slate-100 text-slate-600', 'rejected' => 'bg-rose-100 text-rose-700'];
+    $premiumLabels = ['requested' => 'Menunggu dokter', 'active' => 'Sedang aktif', 'paused' => 'Dijeda', 'closed' => 'Selesai', 'rejected' => 'Ditolak'];
+    $premiumTones = ['requested' => 'bg-amber-100 text-amber-700', 'active' => 'bg-emerald-100 text-emerald-700', 'paused' => 'bg-orange-100 text-orange-700', 'closed' => 'bg-slate-100 text-slate-600', 'rejected' => 'bg-rose-100 text-rose-700'];
 @endphp
 
 <main class="relative overflow-hidden pb-12 pt-28">
@@ -135,7 +135,7 @@
                             @endforeach
                         </div>
 
-                        @if($consultation->premium_status === 'active')
+                        @if($consultation->premium_status === 'active' && $user->hasActivePremium())
                             <form method="POST" action="{{ route('keluhan.premium.message', $consultation) }}" enctype="multipart/form-data" class="border-t border-slate-100 bg-white p-4 sm:p-5">
                                 @csrf
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -144,8 +144,10 @@
                                     <button class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-500">Kirim</button>
                                 </div>
                             </form>
-                        @elseif($consultation->premium_status === 'requested')
+                        @elseif($consultation->premium_status === 'requested' && $user->hasActivePremium())
                             <p class="border-t border-amber-100 bg-amber-50 px-5 py-4 text-sm text-amber-700">Dokter belum menerima permintaan. Percakapan akan terbuka setelah disetujui.</p>
+                        @elseif($consultation->premium_status === 'paused' || ! $user->hasActivePremium())
+                            <p class="border-t border-orange-100 bg-orange-50 px-5 py-4 text-sm text-orange-700">Percakapan dijeda. Aktifkan kembali akun Premium untuk melanjutkan pengiriman pesan.</p>
                         @else
                             <p class="border-t border-slate-100 bg-slate-50 px-5 py-4 text-sm text-slate-500">Percakapan telah {{ $consultation->premium_status === 'rejected' ? 'ditolak' : 'selesai' }} dan hanya dapat dibaca.</p>
                         @endif
@@ -162,7 +164,16 @@
             <div><p class="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">Dokter Terverifikasi</p><h2 class="mt-1 text-2xl font-bold sm:text-3xl">Pilih dokter Anda</h2><p class="mt-2 max-w-2xl text-sm text-slate-600">Hanya dokter yang telah disetujui admin yang ditampilkan.</p></div>
             <div class="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                 @forelse($doctors as $doctor)
-                    <article x-data="{ open: {{ $user->hasActivePremium() && ! $hasActivePremium && ($selectedDoctorId ?? 0) === $doctor->id ? 'true' : 'false' }} }" class="rounded-[26px] border border-emerald-100 bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,.07)] transition hover:-translate-y-1 hover:shadow-xl">
+                    <article
+                        x-data="{ detailsOpen: false }"
+                        @click="detailsOpen = true"
+                        @keydown.enter.self.prevent="detailsOpen = true"
+                        @keydown.escape.window="detailsOpen = false"
+                        tabindex="0"
+                        role="button"
+                        aria-label="Lihat profil {{ $doctor->name }}"
+                        class="cursor-pointer rounded-[26px] border border-emerald-100 bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,.07)] transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-emerald-100"
+                    >
                         <div class="flex items-start gap-4">
                             <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-lg font-bold text-white shadow-md shadow-emerald-500/20">{{ collect(explode(' ', $doctor->name))->filter()->take(2)->map(fn($part) => mb_substr($part, 0, 1))->implode('') }}</div>
                             <div class="min-w-0"><div class="flex items-center gap-1.5"><h3 class="truncate font-bold">{{ $doctor->name }}</h3><span class="text-emerald-500">&#10003;</span></div><p class="text-sm font-semibold text-emerald-700">{{ $doctor->specialty ?: 'Dokter Umum' }}</p><p class="mt-1 text-xs text-slate-500">{{ $doctor->workplace ?: 'Konsultasi online KuloSehat' }}</p></div>
@@ -170,19 +181,82 @@
                         <p class="mt-4 line-clamp-3 min-h-[3.75rem] text-sm leading-5 text-slate-600">{{ $doctor->about ?: 'Siap membantu memberikan informasi dan arahan kesehatan melalui konsultasi KuloSehat.' }}</p>
 
                         @if($user->hasActivePremium() && ! $hasActivePremium)
-                            <button type="button" @click="open = !open" class="mt-4 w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-500">Mulai Keluhan Premium</button>
-                            <form x-show="open" x-cloak x-transition method="POST" action="{{ route('keluhan.premium.store', $doctor) }}" enctype="multipart/form-data" class="mt-4 space-y-3 border-t border-slate-100 pt-4">
-                                @csrf
-                                <input name="judul" maxlength="150" required placeholder="Topik keluhan" class="w-full rounded-xl border-slate-200 text-sm focus:border-emerald-400 focus:ring-emerald-200">
-                                <textarea name="pesan" rows="4" maxlength="5000" required placeholder="Ceritakan kondisi dan pertanyaan Anda..." class="w-full rounded-xl border-slate-200 text-sm focus:border-emerald-400 focus:ring-emerald-200"></textarea>
-                                <input type="file" name="gambar" accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-slate-200 p-2 text-xs">
-                                <button class="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700">Kirim ke dokter</button>
-                            </form>
-                        @elseif($hasActivePremium)
-                            <button disabled class="mt-4 w-full cursor-not-allowed rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-400">Selesaikan konsultasi aktif dahulu</button>
+                            <a @click.stop href="{{ route('premium.conversations.start', $doctor) }}" class="mt-4 block w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-emerald-500">Mulai Keluhan Premium</a>
+                        @elseif($user->hasActivePremium() && $hasActivePremium && $activePremiumConsultation?->doctor_id === $doctor->id)
+                            <a @click.stop href="{{ route('premium.conversations.show', $activePremiumConsultation) }}" class="mt-4 block w-full rounded-xl bg-emerald-50 px-4 py-2.5 text-center text-sm font-bold text-emerald-700 hover:bg-emerald-100">Buka percakapan aktif</a>
+                        @elseif($user->hasActivePremium() && $hasActivePremium)
+                            <button @click.stop type="button" disabled class="mt-4 w-full cursor-not-allowed rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-400">Premium terhubung ke {{ $activePremiumConsultation?->doctor->name ?? 'dokter lain' }}</button>
                         @else
-                            <a href="{{ route('premium.register', ['doctor' => $doctor->id]) }}" class="mt-4 block rounded-xl bg-slate-900 px-4 py-2.5 text-center text-sm font-bold text-white transition hover:bg-emerald-700">Daftar Premium untuk konsultasi</a>
+                            <a @click.stop href="{{ route('premium.register', ['doctor' => $doctor->id]) }}" class="mt-4 block rounded-xl bg-slate-900 px-4 py-2.5 text-center text-sm font-bold text-white transition hover:bg-emerald-700">Aktifkan Premium untuk konsultasi</a>
                         @endif
+
+                        <template x-teleport="body">
+                            <div
+                                x-show="detailsOpen"
+                                x-cloak
+                                x-transition.opacity
+                                @click.self="detailsOpen = false"
+                                class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm sm:p-6"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-label="Profil dokter {{ $doctor->name }}"
+                            >
+                                <div x-show="detailsOpen" x-transition.scale.origin.center class="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[32px] bg-white shadow-[0_30px_90px_rgba(15,23,42,.35)]">
+                                    <button type="button" @click="detailsOpen = false" class="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-md transition hover:bg-rose-50 hover:text-rose-600" aria-label="Tutup profil dokter">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                                    </button>
+
+                                    <div class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-emerald-900 to-emerald-600 px-6 py-8 text-white sm:px-9 sm:py-10">
+                                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,.18),transparent_32%)]"></div>
+                                        <div class="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+                                            <div class="flex h-24 w-24 shrink-0 items-center justify-center rounded-[28px] border border-white/20 bg-white/15 text-3xl font-bold shadow-xl backdrop-blur-sm">{{ collect(explode(' ', $doctor->name))->filter()->take(2)->map(fn($part) => mb_substr($part, 0, 1))->implode('') }}</div>
+                                            <div>
+                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold ring-1 ring-white/25"><span class="text-emerald-200">&#10003;</span> Dokter terverifikasi</span>
+                                                <h3 class="mt-3 text-2xl font-bold sm:text-3xl">{{ $doctor->name }}</h3>
+                                                <p class="mt-1 font-semibold text-emerald-100">{{ $doctor->specialty ?: 'Dokter Umum' }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-6 sm:p-9">
+                                        <div class="grid gap-4 sm:grid-cols-2">
+                                            <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4">
+                                                <p class="text-xs font-bold uppercase tracking-[.16em] text-emerald-700">Spesialisasi</p>
+                                                <p class="mt-2 font-semibold text-slate-900">{{ $doctor->specialty ?: 'Dokter Umum' }}</p>
+                                            </div>
+                                            <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                                                <p class="text-xs font-bold uppercase tracking-[.16em] text-slate-500">Tempat praktik</p>
+                                                <p class="mt-2 font-semibold text-slate-900">{{ $doctor->workplace ?: 'Konsultasi online KuloSehat' }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-6">
+                                            <p class="text-xs font-bold uppercase tracking-[.18em] text-emerald-700">Tentang dokter</p>
+                                            <p class="mt-3 leading-7 text-slate-600">{{ $doctor->about ?: 'Siap membantu memberikan informasi dan arahan kesehatan melalui konsultasi KuloSehat.' }}</p>
+                                        </div>
+
+                                        <div class="mt-6 grid gap-3 sm:grid-cols-3">
+                                            <div class="rounded-2xl border border-slate-100 p-4 text-sm text-slate-600"><strong class="block text-slate-900">Konsultasi privat</strong>Pesan hanya dapat dilihat oleh Anda dan dokter.</div>
+                                            <div class="rounded-2xl border border-slate-100 p-4 text-sm text-slate-600"><strong class="block text-slate-900">Lampiran aman</strong>Kirim gambar pendukung secara privat.</div>
+                                            <div class="rounded-2xl border border-slate-100 p-4 text-sm text-slate-600"><strong class="block text-slate-900">Riwayat tersimpan</strong>Percakapan dapat dibaca kembali.</div>
+                                        </div>
+
+                                        <div class="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                                            <button type="button" @click="detailsOpen = false" class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Tutup</button>
+                                            @if($user->hasActivePremium() && ! $hasActivePremium)
+                                                <a href="{{ route('premium.conversations.start', $doctor) }}" class="rounded-xl bg-emerald-600 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-emerald-500">Mulai konsultasi</a>
+                                            @elseif($user->hasActivePremium() && $hasActivePremium && $activePremiumConsultation?->doctor_id === $doctor->id)
+                                                <a href="{{ route('premium.conversations.show', $activePremiumConsultation) }}" class="rounded-xl bg-emerald-50 px-5 py-3 text-center text-sm font-bold text-emerald-700 transition hover:bg-emerald-100">Buka percakapan aktif</a>
+                                            @elseif($user->hasActivePremium() && $hasActivePremium)
+                                                <button type="button" disabled class="cursor-not-allowed rounded-xl bg-slate-100 px-5 py-3 text-sm font-bold text-slate-400">Premium terhubung ke dokter lain</button>
+                                            @else
+                                                <a href="{{ route('premium.register', ['doctor' => $doctor->id]) }}" class="rounded-xl bg-slate-900 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-emerald-700">Aktifkan Premium untuk konsultasi</a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
                     </article>
                 @empty
                     <div class="md:col-span-2 xl:col-span-3 rounded-2xl border border-dashed border-emerald-200 bg-white p-7 text-center text-sm text-slate-500">Belum ada dokter terverifikasi.</div>

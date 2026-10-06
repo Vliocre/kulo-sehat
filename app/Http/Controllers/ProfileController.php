@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Article;
+use App\Models\Keluhan;
 use App\Models\TopicGuide;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -185,6 +186,30 @@ class ProfileController extends Controller
         $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Deactivate the authenticated user's premium membership.
+     */
+    public function deactivatePremium(Request $request): RedirectResponse
+    {
+        DB::transaction(function () use ($request) {
+            $user = $request->user();
+
+            $user->update([
+                'premium_until' => null,
+            ]);
+
+            Keluhan::where('user_id', $user->id)
+                ->where('jenis', 'premium')
+                ->whereIn('premium_status', ['requested', 'active'])
+                ->update([
+                    'premium_status' => 'paused',
+                    'premium_ended_at' => now(),
+                ]);
+        });
+
+        return Redirect::route('profile.edit')->with('status', 'premium-deactivated');
     }
 
     /**
