@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\TopicGuideController as AdminTopicGuideController;
 use App\Http\Controllers\KalkulatorController;
+use App\Http\Controllers\KeluhanController;
 
 // RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -129,6 +130,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::post('users/{user}/approve-doctor', [UserManagementController::class, 'approveDoctor'])->name('users.approve-doctor');
         Route::post('users/{user}/reject-doctor', [UserManagementController::class, 'rejectDoctor'])->name('users.reject-doctor');
+        Route::get('/premium', [KeluhanController::class, 'indexPremiumAdmin'])->name('premium.index');
+        Route::get('/premium/{keluhan}', [KeluhanController::class, 'showPremiumAdmin'])->name('premium.show');
+        Route::delete('/premium/{user}', [KeluhanController::class, 'revokePremiumAdmin'])->name('premium.revoke');
         Route::resource('users', UserManagementController::class);
         Route::resource('articles', AdminArticleController::class);
         Route::post('topic-guides/import-defaults', [AdminTopicGuideController::class, 'importDefaults'])->name('topic-guides.import-defaults');
@@ -140,7 +144,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])
 require __DIR__.'/auth.php';
 
 // keluhan
-use App\Http\Controllers\KeluhanController;
 
 Route::middleware(['auth', 'verified', 'role:pengguna'])->group(function(){
 
@@ -192,6 +195,8 @@ Route::middleware(['auth', 'verified', 'role:dokter'])->group(function () {
     Route::get('/dokter/keluhan',
         [KeluhanController::class, 'indexDokter'])
         ->name('dokter.keluhan');
+    Route::get('/dokter/layanan-premium', [KeluhanController::class, 'indexPremiumDokter'])->name('dokter.premium');
+    Route::get('/dokter/layanan-premium/{keluhan}', [KeluhanController::class, 'indexPremiumDokter'])->name('dokter.premium.show');
 
     Route::post('/dokter/keluhan/{keluhan}',
         [KeluhanController::class, 'jawab'])

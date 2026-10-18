@@ -21,7 +21,7 @@
                         Mari Bergabung Bersama Kami
                     </h1>
                     <p class="mt-4 text-white/90">
-                        Selamat datang di KuloSehat. Kami menyediakan berbagai artikel dan panduan informatif mengenai penyakit umum, gejala, cara pencegahan, serta penanganan awal yang bisa Anda lakukan.
+                        Selamat datang di Helavio. Kami menyediakan berbagai artikel dan panduan informatif mengenai penyakit umum, gejala, cara pencegahan, serta penanganan awal yang bisa Anda lakukan.
                     </p>
                 </div>
 

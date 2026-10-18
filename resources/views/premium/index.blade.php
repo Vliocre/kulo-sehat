@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Buat Akun Premium - KuloSehat</title>
+    <title>Buat Akun Premium - Helavio</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak]{display:none!important}
@@ -18,7 +18,7 @@
         <section class="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-950 via-emerald-900 to-emerald-600 p-7 text-white shadow-[0_24px_65px_rgba(15,118,110,.25)] sm:p-10">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,.16),transparent_32%)]"></div>
             <div class="relative max-w-3xl">
-                <p class="text-xs font-bold uppercase tracking-[.26em] text-emerald-200">KuloSehat Premium</p>
+                <p class="text-xs font-bold uppercase tracking-[.26em] text-emerald-200">Helavio Premium</p>
                 <h1 class="mt-3 text-3xl font-bold sm:text-4xl">Buat dan Aktifkan Akun Premium</h1>
                 <p class="mt-3 leading-7 text-emerald-50/85">Nikmati konsultasi yang lebih leluasa, pesan lanjutan dengan dokter, lampiran privat, dan riwayat kesehatan yang tersimpan rapi.</p>
                 @if($selectedDoctor)

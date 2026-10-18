@@ -31,6 +31,12 @@
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2 2m6-2a8 8 0 11-16 0 8 8 0 0116 0z" />',
             'pattern' => 'admin.keluhan*',
         ],
+        [
+            'label' => 'Layanan Premium',
+            'route' => 'admin.premium.index',
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="m12 3 2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5L12 3z" />',
+            'pattern' => 'admin.premium.*',
+        ],
     ];
 @endphp
 <!DOCTYPE html>
@@ -38,7 +44,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $documentTitle }} • KuloSehat</title>
+    <title>{{ $documentTitle }} • Helavio</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>

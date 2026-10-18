@@ -46,6 +46,11 @@
             </p>
         </div>
 
+        @if($user->role === 'dokter')
+            <div class="bg-gray-50 rounded-2xl p-4"><p class="text-xs text-gray-500">Spesialis</p><p class="font-semibold text-gray-900">{{ $user->specialty ?: 'Belum diisi' }}</p></div>
+            <div class="bg-gray-50 rounded-2xl p-4"><p class="text-xs text-gray-500">Tempat praktik</p><p class="font-semibold text-gray-900">{{ $user->workplace ?: 'Belum diisi' }}</p></div>
+        @endif
+
     </div>
 
     <form x-show="editMode" x-transition method="post" action="{{ route('profile.update') }}" class="space-y-5">
@@ -65,6 +70,13 @@
                 value="{{ old('email', $user->email) }}"
                 class="w-full rounded-2xl border border-gray-200 px-4 py-3">
         </div>
+
+        @if($user->role === 'dokter')
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="space-y-2"><label class="text-sm font-semibold text-gray-800">Spesialis</label><input type="text" name="specialty" maxlength="255" value="{{ old('specialty', $user->specialty) }}" class="w-full rounded-2xl border border-gray-200 px-4 py-3"></div>
+                <div class="space-y-2"><label class="text-sm font-semibold text-gray-800">Tempat praktik</label><input type="text" name="workplace" maxlength="255" value="{{ old('workplace', $user->workplace) }}" class="w-full rounded-2xl border border-gray-200 px-4 py-3"></div>
+            </div>
+        @endif
 
         <div class="grid md:grid-cols-3 gap-4">
 

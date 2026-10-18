@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kelola Artikel Dokter - KuloSehat</title>
+    <title>Kelola Artikel Dokter - Helavio</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         html { scroll-behavior: smooth; }

@@ -17,14 +17,14 @@ class ArticleController extends Controller
         $search = $request->query('search');
         $categorySlug = $request->query('category');
         $selectedCategory = null;
-        $bmiCategories = Category::forBmi()
+        $bmiCategories = Category::query()
+            ->whereHas('articles', fn ($query) => $query->where('status', 'published'))
             ->get()
             ->sortBy(fn ($category) => array_search($category->slug, Category::bmiSlugs(), true))
             ->values();
 
         $articlesQuery = Article::where('status', 'published')
             ->with(['author', 'category'])
-            ->whereHas('category', fn ($query) => $query->forBmi())
             ->latest();
 
         if ($categorySlug) {

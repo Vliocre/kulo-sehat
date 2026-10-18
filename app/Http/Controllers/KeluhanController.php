@@ -288,26 +288,24 @@ class KeluhanController extends Controller
             ->limit(30)
             ->get();
 
-        $premiumKeluhans = Keluhan::with([
-                'user:id,name,email',
-                'pesanPremium' => fn ($query) => $query
-                    ->with('sender:id,name,role')
-                    ->latest()
-                    ->limit(100),
-            ])
-            ->where('doctor_id', $doctor->id)
-            ->where('jenis', 'premium')
-            ->latest()
-            ->limit(20)
-            ->get();
-
-        KeluhanPremium::whereIn('keluhan_id', $premiumKeluhans->pluck('id'))
-            ->where('sender_id', '!=', $doctor->id)
-            ->whereNull('dibaca_at')
-            ->update(['dibaca_at' => now()]);
-
-        return view('doctor.keluhan', compact('keluhans', 'premiumKeluhans'));
+        return view('doctor.keluhan', ['keluhans' => $keluhans, 'premiumKeluhans' => collect(), 'pageMode' => 'gratis']);
     }
+
+    public function indexPremiumDokter(Request $request, ?Keluhan $keluhan = null)
+    {
+        $doctor = $request->user();
+        if ($keluhan) {
+            abort_unless($keluhan->isPremium() && $keluhan->doctor_id === $doctor->id, 404);
+        }
+        $premiumKeluhans = Keluhan::with(['user:id,name,email,premium_until', 'pesanPremium.sender:id,name,role'])
+            ->where('doctor_id', $doctor->id)->where('jenis', 'premium')->latest()->limit(50)->get();
+        KeluhanPremium::whereIn('keluhan_id', $premiumKeluhans->pluck('id'))
+            ->where('sender_id', '!=', $doctor->id)->whereNull('dibaca_at')->update(['dibaca_at' => now()]);
+        $keluhans = collect();
+        $selectedPremium = $keluhan ? $premiumKeluhans->firstWhere('id', $keluhan->id) : null;
+        return view('doctor.premium', compact('premiumKeluhans', 'selectedPremium'));
+    }
+
 
     public function jawab(Request $r, Keluhan $keluhan)
     {
@@ -492,7 +490,7 @@ class KeluhanController extends Controller
 
     public function premiumAttachment(Request $request, Keluhan $keluhan, KeluhanPremium $message)
     {
-        $this->authorizePremiumParticipant($request, $keluhan);
+        abort_unless($keluhan->isPremium() && ($request->user()->isAdmin() || $keluhan->user_id === $request->user()->id || $keluhan->doctor_id === $request->user()->id), 403);
         abort_unless($message->keluhan_id === $keluhan->id && $message->gambar, 404);
         abort_unless(Storage::disk('local')->exists($message->gambar), 404);
 
@@ -545,6 +543,36 @@ class KeluhanController extends Controller
         $dijawab = Keluhan::where('jenis', 'gratis')->where('status', 'dijawab')->count();
 
         return view('admin.keluhan', compact('keluhans', 'totalKeluhan', 'menunggu', 'dijawab'));
+    }
+
+    public function indexPremiumAdmin()
+    {
+        $premiumUsers = User::where('role', 'pengguna')->whereNotNull('premium_until')->where('premium_until', '>', now())->withCount(['keluhans as conversations_count' => fn ($q) => $q->where('jenis', 'premium')])->latest('premium_until')->paginate(20);
+        return view('admin.premium.index', compact('premiumUsers'));
+    }
+
+    public function showPremiumAdmin(Keluhan $keluhan)
+    {
+        abort_unless($keluhan->isPremium(), 404);
+        $keluhan->load(['user', 'doctor']);
+        $conversations = Keluhan::with(['doctor:id,name,specialty,workplace', 'pesanPremium.sender:id,name,role'])
+            ->where('user_id', $keluhan->user_id)
+            ->where('jenis', 'premium')
+            ->latest()
+            ->limit(30)
+            ->get();
+        $conversation = $conversations->firstWhere('id', $keluhan->id);
+        return view('admin.premium.show', compact('keluhan', 'conversations', 'conversation'));
+    }
+
+    public function revokePremiumAdmin(User $user)
+    {
+        abort_unless($user->role === 'pengguna', 404);
+        DB::transaction(function () use ($user) {
+            $user->update(['premium_until' => null]);
+            Keluhan::where('user_id', $user->id)->where('jenis', 'premium')->whereIn('premium_status', ['requested', 'active'])->update(['premium_status' => 'paused', 'premium_ended_at' => now()]);
+        });
+        return back()->with('success', 'Layanan Premium pengguna berhasil dicabut.');
     }
 
     public function showAdmin(Keluhan $keluhan)

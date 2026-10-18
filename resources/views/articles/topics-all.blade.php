@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Panduan Topik - KuloSehat</title>
+    <title>Panduan Topik - Helavio</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important;}</style>
@@ -99,7 +99,7 @@
             </div>
 
             <div>
-                <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wide">KuloSehat</h4>
+                <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wide">Helavio</h4>
                 <ul class="space-y-2 text-sm text-slate-200">
                     <li><a href="#" class="hover:text-emerald-200">Tentang Kami</a></li>
                     <li><a href="#" class="hover:text-emerald-200">Artikel Terbaru</a></li>
@@ -121,7 +121,7 @@
         </div>
         <div class="relative border-t border-white/10">
             <div class="max-w-6xl mx-auto px-6 lg:px-8 py-4 text-xs text-slate-300 flex flex-col sm:flex-row justify-between gap-2">
-                <span>Ac {{ date('Y') }} KuloSehat. All rights reserved.</span>
+                <span>Ac {{ date('Y') }} Helavio. All rights reserved.</span>
                 <span class="text-emerald-200 font-semibold">Keamanan & Privasi</span>
             </div>
         </div>

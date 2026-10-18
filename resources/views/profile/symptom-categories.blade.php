@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Gejala Penyakit - KuloSehat</title>
+    <title>Gejala Penyakit - Helavio</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important;}</style>

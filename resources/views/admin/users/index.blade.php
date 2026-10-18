@@ -94,6 +94,9 @@
                                 <td class="px-5 py-4 text-center">
                                     <div class="flex flex-col items-center gap-2">
                                         <a href="{{ route('admin.users.edit', $user->id) }}" class="text-emerald-600 hover:text-emerald-800 font-semibold">Edit</a>
+                                        @if($user->id !== auth()->id())
+                                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Hapus akun ini?');">@csrf @method('DELETE')<button class="text-xs font-semibold text-red-600 hover:text-red-800">Hapus</button></form>
+                                        @endif
                                         @if ($user->role === 'dokter' && $user->doctor_verification_status !== 'approved')
                                             <form action="{{ route('admin.users.approve-doctor', $user->id) }}" method="POST">
                                                 @csrf

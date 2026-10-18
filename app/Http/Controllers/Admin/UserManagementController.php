@@ -106,6 +106,13 @@ class UserManagementController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'Akun dokter ditandai belum disetujui.');
     }
 
+    public function destroy(User $user): RedirectResponse
+    {
+        abort_if($user->id === auth()->id(), 403, 'Admin tidak dapat menghapus akunnya sendiri.');
+        $user->delete();
+        return redirect()->route('admin.users.index')->with('success', 'Akun pengguna berhasil dihapus.');
+    }
+
     // Method create, store, dan destroy bisa Anda kembangkan selanjutnya.
     public function create()
     {

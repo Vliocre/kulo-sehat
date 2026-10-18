@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Artikel Tersimpan - KuloSehat</title>
+    <title>Artikel Tersimpan - Helavio</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important;}</style>
@@ -39,7 +39,7 @@
                                     <img src="{{ asset('storage/' . $savedArticle->image) }}" alt="{{ $savedArticle->title }}" class="h-52 w-full object-cover">
                                 @else
                                     <div class="flex h-52 w-full items-center justify-center bg-emerald-50 text-sm font-semibold text-emerald-700">
-                                        Artikel KuloSehat
+                                        Artikel Helavio
                                     </div>
                                 @endif
                             </a>

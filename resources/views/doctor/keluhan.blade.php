@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Keluhan Pasien - KuloSehat</title>
+    <title>Keluhan Pasien - Helavio</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>.page-bg{background-color:#f5faf7;background-image:radial-gradient(18% 24% at 15% 18%,rgba(52,211,153,.08),transparent 50%),radial-gradient(22% 26% at 82% 10%,rgba(34,197,94,.07),transparent 48%),linear-gradient(135deg,#f9fdfb 0%,#edf6f1 45%,#e9f3ef 100%)}</style>
 </head>
@@ -21,7 +21,7 @@
         <section class="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-emerald-800 via-emerald-600 to-teal-500 p-6 text-white shadow-[0_24px_65px_rgba(16,185,129,.3)] sm:p-8">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,.2),transparent_35%)]"></div>
             <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div><p class="text-xs font-semibold uppercase tracking-[.28em] text-emerald-100">Dashboard Dokter</p><h1 class="mt-3 text-3xl font-bold sm:text-4xl">Keluhan Pasien</h1><p class="mt-2 max-w-2xl text-emerald-50/90">Kelola permintaan premium yang ditujukan kepada Anda dan bantu keluhan gratis dengan satu jawaban.</p></div>
+                <div><p class="text-xs font-semibold uppercase tracking-[.28em] text-emerald-100">Dashboard Dokter</p><h1 class="mt-3 text-3xl font-bold sm:text-4xl">Keluhan Pasien</h1><p class="mt-2 max-w-2xl text-emerald-50/90">Tinjau keluhan gratis dan berikan satu jawaban.</p></div>
                 <a href="{{ route('doctor.dashboard') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold ring-1 ring-white/30 transition hover:bg-white/20"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>Kembali ke Dashboard</a>
             </div>
         </section>
@@ -29,6 +29,7 @@
         @if(session('ok'))<div class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('ok') }}</div>@endif
         @if($errors->any())<div class="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><ul class="list-inside list-disc">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 
+        @if($premiumKeluhans->isNotEmpty())
         <section class="mt-8">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div><p class="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">Keluhan Premium</p><h2 class="mt-1 text-2xl font-bold sm:text-3xl">Percakapan pribadi Anda</h2><p class="mt-2 text-sm text-slate-600">Hanya pasien yang memilih Anda yang muncul di bagian ini.</p></div>
@@ -89,6 +90,7 @@
                 @endforelse
             </div>
         </section>
+        @endif
 
         <section class="mt-12 border-t border-emerald-100 pt-10">
             <div><p class="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">Keluhan Gratis</p><h2 class="mt-1 text-2xl font-bold sm:text-3xl">Pertanyaan satu kali jawab</h2><p class="mt-2 text-sm text-slate-600">Jawaban pertama akan tercatat atas nama dokter yang merespons.</p></div>

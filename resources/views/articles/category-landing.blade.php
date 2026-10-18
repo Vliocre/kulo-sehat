@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kategori {{ $categoryName }} - KuloSehat</title>
+    <title>Kategori {{ $categoryName }} - Helavio</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -117,7 +117,7 @@
                             <div class="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-semibold">ID</div>
                             <div>
                                 <p class="font-semibold text-slate-900">Terverifikasi</p>
-                                <p class="text-slate-600">Ditinjau oleh tim KuloSehat.</p>
+                                <p class="text-slate-600">Ditinjau oleh tim Helavio.</p>
                             </div>
                         </div>
                     </div>
@@ -287,7 +287,7 @@
             <div class="grid lg:grid-cols-5 gap-6 items-center">
                 <div class="lg:col-span-2 bg-gradient-to-br from-slate-900 via-emerald-900 to-emerald-800 text-white rounded-3xl p-8 shadow-[0_26px_70px_rgba(15,23,42,0.18)]">
                     <p class="text-xs uppercase tracking-[0.25em] text-emerald-200 font-semibold">Testimoni</p>
-                    <p class="mt-3 text-lg leading-relaxed">"Artikel di KuloSehat memudahkan saya memahami langkah awal sebelum ke dokter. Penjelasannya singkat, bahasa mudah, dan ada panduan kapan harus waspada."</p>
+                    <p class="mt-3 text-lg leading-relaxed">"Artikel di Helavio memudahkan saya memahami langkah awal sebelum ke dokter. Penjelasannya singkat, bahasa mudah, dan ada panduan kapan harus waspada."</p>
                     <div class="mt-6 flex items-center gap-3">
                         <div class="h-12 w-12 rounded-full bg-emerald-500/30 border border-emerald-200 flex items-center justify-center text-white font-semibold">A</div>
                         <div>
@@ -341,7 +341,7 @@
             </div>
 
             <div>
-                <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wide">KuloSehat</h4>
+                <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wide">Helavio</h4>
                 <ul class="space-y-2 text-sm text-slate-200">
                     <li><a href="#" class="hover:text-emerald-200">Tentang Kami</a></li>
                     <li><a href="#" class="hover:text-emerald-200">Artikel Terbaru</a></li>
@@ -363,7 +363,7 @@
         </div>
         <div class="relative border-t border-white/10">
             <div class="max-w-6xl mx-auto px-6 lg:px-8 py-4 text-xs text-slate-300 flex flex-col sm:flex-row justify-between gap-2">
-                <span>Ac {{ date('Y') }} KuloSehat. All rights reserved.</span>
+                <span>Ac {{ date('Y') }} Helavio. All rights reserved.</span>
                 <span class="text-emerald-200 font-semibold">Keamanan & Privasi</span>
             </div>
         </div>

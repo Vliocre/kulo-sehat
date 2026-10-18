@@ -21,7 +21,7 @@
                 Buat Akun Baru Anda
             </h1>
             <p class="mt-4 text-white/90">
-                Bergabunglah dengan KuloSehat untuk mendapatkan akses penuh ke
+                Bergabunglah dengan Helavio untuk mendapatkan akses penuh ke
                 informasi kesehatan terpercaya.
             </p>
         </div>

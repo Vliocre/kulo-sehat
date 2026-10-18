@@ -61,6 +61,13 @@
                                class="hover:text-green-600 {{ request()->routeIs('dokter.keluhan*') ? 'text-green-600' : 'text-gray-700' }}">
                                 Keluhan Pasien
                             </a>
+                            <a href="{{ route('dokter.premium') }}" class="hover:text-green-600 {{ request()->routeIs('dokter.premium*') ? 'text-green-600' : 'text-gray-700' }}">Layanan Premium</a>
+                        @endif
+                    @endauth
+
+                    @auth
+                        @if(Auth::user()->isAdmin())
+                            <a href="{{ route('admin.premium.index') }}" class="hover:text-green-600 {{ request()->routeIs('admin.premium.*') ? 'text-green-600' : 'text-gray-700' }}">Layanan Premium</a>
                         @endif
                     @endauth
 
@@ -113,8 +120,8 @@
                 <div class="text-center">
                     <a href="{{ route('home') }}"
                        class="text-xl font-bold">
-                        <span class="text-green-600">Kulo</span>
-                        <span class="text-gray-900">Sehat.</span>
+                        <span class="text-green-600">HelaVio</span>
+
                     </a>
                 </div>
 

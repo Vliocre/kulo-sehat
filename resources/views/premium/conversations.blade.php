@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Percakapan Premium - KuloSehat</title>
+    <title>Percakapan Premium - Helavio</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak]{display:none!important}
@@ -26,7 +26,7 @@
             <div>
                 <div class="flex items-center gap-2">
                     <span class="rounded-full bg-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[.2em] ring-1 ring-white/20">Ruang Privat</span>
-                    <span class="text-xs text-emerald-100">KuloSehat Premium</span>
+                    <span class="text-xs text-emerald-100">Helavio Premium</span>
                 </div>
                 <h1 class="mt-3 text-2xl font-bold sm:text-3xl">Percakapan dengan dokter</h1>
                 <p class="mt-1 text-sm text-emerald-50/80">Konsultasi, lampiran, dan riwayat Anda tersimpan aman dalam satu ruang.</p>
@@ -96,7 +96,7 @@
                     <header class="border-b border-slate-100 px-6 py-5 sm:px-8">
                         <div class="flex items-center gap-4">
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-lg font-bold text-white shadow-lg shadow-emerald-500/20">{{ collect(explode(' ', $draftDoctor->name))->filter()->take(2)->map(fn($part) => mb_substr($part, 0, 1))->implode('') }}</div>
-                            <div><div class="flex items-center gap-2"><h2 class="text-lg font-bold">{{ $draftDoctor->name }}</h2><span class="text-emerald-500">&#10003;</span></div><p class="text-sm font-semibold text-emerald-700">{{ $draftDoctor->specialty ?: 'Dokter Umum' }}</p><p class="text-xs text-slate-500">{{ $draftDoctor->workplace ?: 'Konsultasi online KuloSehat' }}</p></div>
+                            <div><div class="flex items-center gap-2"><h2 class="text-lg font-bold">{{ $draftDoctor->name }}</h2><span class="text-emerald-500">&#10003;</span></div><p class="text-sm font-semibold text-emerald-700">{{ $draftDoctor->specialty ?: 'Dokter Umum' }}</p><p class="text-xs text-slate-500">{{ $draftDoctor->workplace ?: 'Konsultasi online Helavio' }}</p></div>
                         </div>
                     </header>
                     <form x-data="{ fileName: '' }" method="POST" action="{{ route('keluhan.premium.store', $draftDoctor) }}" enctype="multipart/form-data" class="flex min-h-0 flex-1 flex-col">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Profil Saya - KuloSehat</title>
+    <title>Profil Saya - Helavio</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -49,7 +49,7 @@
                     <p class="text-sm uppercase tracking-[0.35em] text-gray-400 font-semibold">Pengaturan Akun</p>
                     <h1 class="mt-4 text-3xl md:text-4xl font-bold text-gray-900">Atur Profil &amp; Keamanan Anda</h1>
                     <p class="mt-3 text-gray-600 leading-relaxed">
-                        Perbarui informasi pribadi, ubah kata sandi, dan kelola keamanan akun Anda dengan tampilan yang lebih bersih dan konsisten dengan pengalaman KuloSehat.
+                        Perbarui informasi pribadi, ubah kata sandi, dan kelola keamanan akun Anda dengan tampilan yang lebih bersih dan konsisten dengan pengalaman Helavio.
                     </p>
                 </div>
                 <div class="flex-1">

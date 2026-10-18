@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Keluhan - KuloSehat</title>
+    <title>Keluhan - Helavio</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak]{display:none!important}
@@ -37,7 +37,7 @@
                         </span>
                     </div>
                     <h1 class="mt-3 text-3xl font-bold sm:text-4xl">{{ $pageMode === 'doctors' ? 'Pilih Dokter' : ($pageMode === 'premium-registration' ? 'Aktifkan Akun Premium' : 'Keluhan Saya') }}</h1>
-                    <p class="mt-2 max-w-2xl text-emerald-50/90">{{ $pageMode === 'doctors' ? 'Temukan dokter yang telah diverifikasi dan mulai konsultasi sesuai kebutuhan Anda.' : ($pageMode === 'premium-registration' ? 'Selesaikan pendaftaran untuk melanjutkan konsultasi dengan dokter pilihan Anda.' : 'Kirim keluhan gratis untuk satu jawaban, atau lanjutkan percakapan melalui Keluhan Premium.') }}</p>
+                    <p class="mt-2 max-w-2xl text-emerald-50/90">{{ $pageMode === 'doctors' ? 'Temukan dokter yang telah diverifikasi dan mulai konsultasi sesuai kebutuhan Anda.' : ($pageMode === 'premium-registration' ? 'Selesaikan pendaftaran untuk melanjutkan konsultasi dengan dokter pilihan Anda.' : 'Kirim keluhan gratis dan terima satu jawaban dari dokter.') }}</p>
                 </div>
                 <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold ring-1 ring-white/30 transition hover:bg-white/20">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
@@ -60,7 +60,7 @@
                 <div class="overflow-hidden rounded-[30px] border border-emerald-100 bg-white shadow-[0_22px_55px_rgba(15,23,42,.1)]">
                     <div class="bg-gradient-to-r from-slate-950 via-emerald-900 to-emerald-600 p-6 text-white sm:p-8">
                         <p class="text-xs font-bold uppercase tracking-[.22em] text-emerald-200">Paket 30 Hari</p>
-                        <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Keluhan Premium KuloSehat</h2>
+                        <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Keluhan Premium Helavio</h2>
                         <p class="mt-3 text-sm leading-6 text-emerald-50/85">Buka akses percakapan berkelanjutan dan konsultasikan keluhan Anda dengan dokter yang dipilih.</p>
                     </div>
                     <div class="p-6 sm:p-8">
@@ -85,80 +85,6 @@
             </section>
         @endif
 
-        @if($pageMode === 'consultations')
-        <section id="percakapan-premium" class="mt-8 scroll-mt-28">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">Layanan Premium</p>
-                    <h2 class="mt-1 text-2xl font-bold sm:text-3xl">Percakapan dengan dokter pilihan</h2>
-                </div>
-                <span class="text-sm text-slate-500">{{ $premiumKeluhans->count() }} riwayat konsultasi</span>
-            </div>
-
-            <div class="mt-5 space-y-5">
-                @forelse($premiumKeluhans as $consultation)
-                    <article class="overflow-hidden rounded-[28px] border border-emerald-100 bg-white shadow-[0_18px_45px_rgba(15,23,42,.08)]">
-                        <header class="flex flex-col gap-4 border-b border-emerald-50 bg-gradient-to-r from-emerald-50 to-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                            <div class="flex items-center gap-4">
-                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 font-bold text-white">
-                                    {{ collect(explode(' ', $consultation->doctor->name ?? 'Dokter'))->filter()->take(2)->map(fn($part) => mb_substr($part, 0, 1))->implode('') }}
-                                </div>
-                                <div>
-                                    <p class="text-xs font-bold uppercase tracking-[.18em] text-emerald-700">{{ $consultation->doctor?->specialty ?: 'Dokter Umum' }}</p>
-                                    <h3 class="font-bold text-slate-900">{{ $consultation->doctor->name ?? 'Dokter tidak tersedia' }}</h3>
-                                    <p class="mt-1 text-sm text-slate-500">{{ $consultation->judul }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="rounded-full px-3 py-1 text-xs font-bold {{ $premiumTones[$consultation->premium_status] ?? 'bg-slate-100 text-slate-600' }}">{{ $premiumLabels[$consultation->premium_status] ?? ucfirst($consultation->premium_status) }}</span>
-                                @if($consultation->premium_status === 'active')
-                                    <form method="POST" action="{{ route('keluhan.premium.close', $consultation) }}" onsubmit="return confirm('Selesaikan konsultasi ini? Riwayat pesan tetap tersimpan.');">
-                                        @csrf @method('PATCH')
-                                        <button class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-600 hover:border-rose-200 hover:text-rose-600">Selesaikan</button>
-                                    </form>
-                                @endif
-                            </div>
-                        </header>
-
-                        <div class="max-h-[430px] space-y-3 overflow-y-auto bg-slate-50/60 p-4 sm:p-6">
-                            @foreach($consultation->pesanPremium->sortBy('created_at') as $message)
-                                @php $mine = $message->sender_id === $user->id; @endphp
-                                <div class="flex {{ $mine ? 'justify-end' : 'justify-start' }}">
-                                    <div class="max-w-[88%] rounded-2xl px-4 py-3 sm:max-w-[72%] {{ $mine ? 'rounded-br-md bg-emerald-600 text-white' : 'rounded-bl-md border border-slate-100 bg-white text-slate-700 shadow-sm' }}">
-                                        <p class="whitespace-pre-line text-sm leading-6">{{ $message->pesan }}</p>
-                                        @if($message->gambar)
-                                            <a href="{{ route('keluhan.premium.attachment', [$consultation, $message]) }}" target="_blank"><img src="{{ route('keluhan.premium.attachment', [$consultation, $message]) }}" alt="Lampiran pesan" loading="lazy" class="mt-2 max-h-56 w-full rounded-xl object-cover"></a>
-                                        @endif
-                                        <p class="mt-1.5 text-[10px] {{ $mine ? 'text-emerald-100' : 'text-slate-400' }}">{{ $message->created_at->format('d M, H:i') }}</p>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        @if($consultation->premium_status === 'active' && $user->hasActivePremium())
-                            <form method="POST" action="{{ route('keluhan.premium.message', $consultation) }}" enctype="multipart/form-data" class="border-t border-slate-100 bg-white p-4 sm:p-5">
-                                @csrf
-                                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                                    <textarea name="pesan" rows="2" maxlength="5000" placeholder="Tulis pesan untuk dokter..." class="w-full flex-1 resize-none rounded-2xl border-slate-200 text-sm focus:border-emerald-400 focus:ring-emerald-200"></textarea>
-                                    <label class="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-xs font-semibold text-slate-600 hover:border-emerald-300 hover:text-emerald-700">Lampirkan gambar<input type="file" name="gambar" accept="image/jpeg,image/png,image/webp" class="sr-only"></label>
-                                    <button class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-500">Kirim</button>
-                                </div>
-                            </form>
-                        @elseif($consultation->premium_status === 'requested' && $user->hasActivePremium())
-                            <p class="border-t border-amber-100 bg-amber-50 px-5 py-4 text-sm text-amber-700">Dokter belum menerima permintaan. Percakapan akan terbuka setelah disetujui.</p>
-                        @elseif($consultation->premium_status === 'paused' || ! $user->hasActivePremium())
-                            <p class="border-t border-orange-100 bg-orange-50 px-5 py-4 text-sm text-orange-700">Percakapan dijeda. Aktifkan kembali akun Premium untuk melanjutkan pengiriman pesan.</p>
-                        @else
-                            <p class="border-t border-slate-100 bg-slate-50 px-5 py-4 text-sm text-slate-500">Percakapan telah {{ $consultation->premium_status === 'rejected' ? 'ditolak' : 'selesai' }} dan hanya dapat dibaca.</p>
-                        @endif
-                    </article>
-                @empty
-                    <div class="rounded-[28px] border border-dashed border-emerald-200 bg-white/70 p-8 text-center"><p class="font-semibold text-slate-800">Belum ada Keluhan Premium</p><p class="mt-1 text-sm text-slate-500">Pilih dokter terverifikasi di bawah untuk memulai.</p></div>
-                @endforelse
-            </div>
-        </section>
-        @endif
-
         @if($pageMode === 'doctors')
         <section id="daftar-dokter" class="mt-10 scroll-mt-28">
             <div><p class="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">Dokter Terverifikasi</p><h2 class="mt-1 text-2xl font-bold sm:text-3xl">Pilih dokter Anda</h2><p class="mt-2 max-w-2xl text-sm text-slate-600">Hanya dokter yang telah disetujui admin yang ditampilkan.</p></div>
@@ -176,9 +102,9 @@
                     >
                         <div class="flex items-start gap-4">
                             <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-lg font-bold text-white shadow-md shadow-emerald-500/20">{{ collect(explode(' ', $doctor->name))->filter()->take(2)->map(fn($part) => mb_substr($part, 0, 1))->implode('') }}</div>
-                            <div class="min-w-0"><div class="flex items-center gap-1.5"><h3 class="truncate font-bold">{{ $doctor->name }}</h3><span class="text-emerald-500">&#10003;</span></div><p class="text-sm font-semibold text-emerald-700">{{ $doctor->specialty ?: 'Dokter Umum' }}</p><p class="mt-1 text-xs text-slate-500">{{ $doctor->workplace ?: 'Konsultasi online KuloSehat' }}</p></div>
+                            <div class="min-w-0"><div class="flex items-center gap-1.5"><h3 class="truncate font-bold">{{ $doctor->name }}</h3><span class="text-emerald-500">&#10003;</span></div><p class="text-sm font-semibold text-emerald-700">{{ $doctor->specialty ?: 'Dokter Umum' }}</p><p class="mt-1 text-xs text-slate-500">{{ $doctor->workplace ?: 'Konsultasi online Helavio' }}</p></div>
                         </div>
-                        <p class="mt-4 line-clamp-3 min-h-[3.75rem] text-sm leading-5 text-slate-600">{{ $doctor->about ?: 'Siap membantu memberikan informasi dan arahan kesehatan melalui konsultasi KuloSehat.' }}</p>
+                        <p class="mt-4 line-clamp-3 min-h-[3.75rem] text-sm leading-5 text-slate-600">{{ $doctor->about ?: 'Siap membantu memberikan informasi dan arahan kesehatan melalui konsultasi Helavio.' }}</p>
 
                         @if($user->hasActivePremium() && ! $hasActivePremium)
                             <a @click.stop href="{{ route('premium.conversations.start', $doctor) }}" class="mt-4 block w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-emerald-500">Mulai Keluhan Premium</a>
@@ -226,13 +152,13 @@
                                             </div>
                                             <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                                                 <p class="text-xs font-bold uppercase tracking-[.16em] text-slate-500">Tempat praktik</p>
-                                                <p class="mt-2 font-semibold text-slate-900">{{ $doctor->workplace ?: 'Konsultasi online KuloSehat' }}</p>
+                                                <p class="mt-2 font-semibold text-slate-900">{{ $doctor->workplace ?: 'Konsultasi online Helavio' }}</p>
                                             </div>
                                         </div>
 
                                         <div class="mt-6">
                                             <p class="text-xs font-bold uppercase tracking-[.18em] text-emerald-700">Tentang dokter</p>
-                                            <p class="mt-3 leading-7 text-slate-600">{{ $doctor->about ?: 'Siap membantu memberikan informasi dan arahan kesehatan melalui konsultasi KuloSehat.' }}</p>
+                                            <p class="mt-3 leading-7 text-slate-600">{{ $doctor->about ?: 'Siap membantu memberikan informasi dan arahan kesehatan melalui konsultasi Helavio.' }}</p>
                                         </div>
 
                                         <div class="mt-6 grid gap-3 sm:grid-cols-3">
