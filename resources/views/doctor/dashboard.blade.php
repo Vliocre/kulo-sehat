@@ -1,5 +1,5 @@
     <!DOCTYPE html>
-    <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="aos-js">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,34 +8,6 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>
             [x-cloak]{display:none!important;}
-            @keyframes page-fade-in {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            @keyframes page-fade-up {
-                from { opacity: 0; transform: translateY(12px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .page-enter {
-                animation: page-fade-in 420ms ease-out both;
-            }
-            .page-enter > * {
-                animation: page-fade-up 520ms ease-out both;
-            }
-            .page-enter > *:nth-child(2) { animation-delay: 60ms; }
-            .page-enter > *:nth-child(3) { animation-delay: 120ms; }
-            .page-enter > *:nth-child(4) { animation-delay: 180ms; }
-            .page-enter > *:nth-child(5) { animation-delay: 240ms; }
-            .page-enter > *:nth-child(6) { animation-delay: 300ms; }
-            .page-enter > *:nth-child(7) { animation-delay: 360ms; }
-            .page-enter > *:nth-child(8) { animation-delay: 420ms; }
-            @media (prefers-reduced-motion: reduce) {
-                .page-enter,
-                .page-enter > * {
-                    animation: none !important;
-                    transform: none !important;
-                }
-            }
         </style>
     </head>
     <body class="font-sans antialiased bg-slate-50 min-h-screen relative">
@@ -89,7 +61,7 @@
             <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(74,222,128,0.12),transparent_30%),radial-gradient(circle_at_50%_70%,rgba(52,211,153,0.12),transparent_35%)]"></div>
 
             {{-- Hero --}}
-            <section class="relative pt-24 pb-24 lg:pb-28 mt-2 lg:mt-8">
+            <section data-aos="fade-up" class="relative pt-24 pb-24 lg:pb-28 mt-2 lg:mt-8">
                 <div class="max-w-6xl mx-auto px-6 lg:px-8">
                     <div class="relative overflow-hidden rounded-[32px] shadow-[0_26px_80px_rgba(15,23,42,0.16)] bg-slate-900 text-white">
                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1VKm9Wd6WasiHVYT4MZP6bGn3fPe-7y3Xng&s" alt="Consultations" class="absolute inset-0 w-full h-full object-cover">
@@ -136,7 +108,7 @@
             </section>
 
             {{-- Utilities --}}
-            <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-10 lg:mt-1">
+            <section data-aos="fade-up" data-aos-delay="100" class="max-w-6xl mx-auto px-6 lg:px-8 mt-10 lg:mt-1">
                 <div class="grid lg:grid-cols-2 gap-6">
                     @foreach ($utilities as $tool)
                         <div class="bg-white rounded-[22px] shadow-[0_18px_40px_rgba(0,0,0,0.08)] ring-1 ring-slate-100 p-6 flex flex-col gap-3">
@@ -153,7 +125,7 @@
             </section>
 
             {{-- Latest public articles --}}
-            <section id="artikel" class="max-w-6xl mx-auto px-6 lg:px-8 mt-16">
+            <section data-aos="fade-up" data-aos-delay="160" id="artikel" class="max-w-6xl mx-auto px-6 lg:px-8 mt-16">
                 <div class="text-center space-y-2">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Artikel Publik Terbaru</p>
                     <h2 class="text-3xl font-bold text-slate-900">Referensi terbaru untuk pasien</h2>
@@ -186,7 +158,7 @@
             </section>
 
             {{-- CTA --}}
-            <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-16 mb-16">
+            <section data-aos="fade-up" data-aos-delay="220" class="max-w-6xl mx-auto px-6 lg:px-8 mt-16 mb-16">
                 <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-700 to-emerald-500 text-white shadow-[0_26px_70px_rgba(15,23,42,0.18)]">
                     <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.08),transparent_35%)]"></div>
                     <div class="relative p-8 lg:p-12 grid lg:grid-cols-2 gap-6 items-center">
@@ -260,5 +232,6 @@
             </div>
         </footer>
 
+        <x-ai-orb />
     </body>
     </html>

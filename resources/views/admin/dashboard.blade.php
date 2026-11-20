@@ -6,7 +6,7 @@
 
 @section('content')
     <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div class="rounded-3xl bg-white shadow-lg border border-emerald-50 p-6 flex items-center gap-4">
+        <div data-aos="fade-up" data-aos-delay="230" class="rounded-3xl bg-white shadow-lg border border-emerald-50 p-6 flex items-center gap-4">
             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 14a4 4 0 10-8 0m8 0v1a4 4 0 01-4 4h-2a4 4 0 01-4-4v-1m8 0V8a4 4 0 10-8 0v6"/></svg>
             </div>
@@ -15,7 +15,7 @@
                 <p class="text-3xl font-bold text-gray-900">{{ $totalUsers }}</p>
             </div>
         </div>
-        <div class="rounded-3xl bg-white shadow-lg border border-emerald-50 p-6 flex items-center gap-4">
+        <div data-aos="fade-up" data-aos-delay="290" class="rounded-3xl bg-white shadow-lg border border-emerald-50 p-6 flex items-center gap-4">
             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-lime-100 text-lime-600">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
             </div>
@@ -24,7 +24,7 @@
                 <p class="text-3xl font-bold text-gray-900">{{ $totalArticles }}</p>
             </div>
         </div>
-        <div class="rounded-3xl bg-gradient-to-br from-emerald-500 to-lime-500 text-white shadow-lg p-6">
+        <div data-aos="fade-up" data-aos-delay="350" class="rounded-3xl bg-gradient-to-br from-emerald-500 to-lime-500 text-white shadow-lg p-6">
             <p class="text-sm text-white/80">Performa Platform</p>
             <p class="text-3xl font-bold mt-2">{{ $totalUsers + $totalArticles }} <span class="text-base font-normal text-white/80">asset aktif</span></p>
             <p class="text-sm text-white/80 mt-3">Gabungan pengguna dan artikel siap publikasi.</p>
@@ -33,7 +33,7 @@
 
     <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div class="xl:col-span-2 space-y-6">
-            <div class="rounded-3xl bg-white shadow-lg border border-emerald-50 p-6">
+            <div data-aos="fade-up" data-aos-delay="450" class="rounded-3xl bg-white shadow-lg border border-emerald-50 p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-500">Perhatian Hari Ini</p>
@@ -68,7 +68,7 @@
         </div>
 
         <div class="space-y-6">
-            <div class="rounded-3xl bg-white shadow-lg border border-emerald-50 p-6 space-y-4">
+            <div data-aos="fade-up" data-aos-delay="450" class="rounded-3xl bg-white shadow-lg border border-emerald-50 p-6 space-y-4">
                 <h2 class="text-lg font-bold text-gray-900">Tindakan Cepat</h2>
                 <a href="{{ route('admin.articles.index') }}" class="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 hover:border-emerald-200 hover:bg-emerald-50 transition">
                     <div class="flex items-center gap-3">

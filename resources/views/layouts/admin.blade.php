@@ -37,52 +37,28 @@
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="m12 3 2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5L12 3z" />',
             'pattern' => 'admin.premium.*',
         ],
+        [
+            'label' => 'Pengajuan Penarikan',
+            'route' => 'admin.withdrawals.index',
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" />',
+            'pattern' => 'admin.withdrawals.*',
+        ],
     ];
 @endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="aos-js">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $documentTitle }} • Helavio</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <style>
-        @keyframes page-fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes page-fade-up {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .page-enter {
-            animation: page-fade-in 420ms ease-out both;
-        }
-        .page-enter > * {
-            animation: page-fade-up 520ms ease-out both;
-        }
-        .page-enter > *:nth-child(2) { animation-delay: 60ms; }
-        .page-enter > *:nth-child(3) { animation-delay: 120ms; }
-        .page-enter > *:nth-child(4) { animation-delay: 180ms; }
-        .page-enter > *:nth-child(5) { animation-delay: 240ms; }
-        .page-enter > *:nth-child(6) { animation-delay: 300ms; }
-        .page-enter > *:nth-child(7) { animation-delay: 360ms; }
-        .page-enter > *:nth-child(8) { animation-delay: 420ms; }
-        @media (prefers-reduced-motion: reduce) {
-            .page-enter,
-            .page-enter > * {
-                animation: none !important;
-                transform: none !important;
-            }
-        }
-    </style>
 </head>
 <body class="font-sans bg-gradient-to-br from-emerald-50 via-white to-lime-100 text-gray-900">
     <div class="min-h-screen flex">
         <aside class="w-72 flex-shrink-0 bg-white/85 backdrop-blur border-r border-emerald-100 shadow-lg flex flex-col">
             <div class="px-8 py-10">
-                <span class="text-2xl font-bold text-emerald-600">Kulo</span><span class="text-2xl font-bold text-gray-900">Sehat.</span>
+                <span class="text-2xl font-bold text-emerald-600">Hela</span><span class="text-2xl font-bold text-gray-900">Vio</span>
                 <p class="text-sm text-gray-500 mt-1">Healthcare Admin Panel</p>
             </div>
             <nav class="flex-1 px-6 space-y-2">

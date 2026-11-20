@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="aos-js">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,34 +16,6 @@
         [x-cloak]{display:none!important;}
         .no-scrollbar::-webkit-scrollbar{display:none;}
         .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none;}
-        @keyframes page-fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes page-fade-up {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .page-enter {
-            animation: page-fade-in 420ms ease-out both;
-        }
-        .page-enter > * {
-            animation: page-fade-up 520ms ease-out both;
-        }
-        .page-enter > *:nth-child(2) { animation-delay: 60ms; }
-        .page-enter > *:nth-child(3) { animation-delay: 120ms; }
-        .page-enter > *:nth-child(4) { animation-delay: 180ms; }
-        .page-enter > *:nth-child(5) { animation-delay: 240ms; }
-        .page-enter > *:nth-child(6) { animation-delay: 300ms; }
-        .page-enter > *:nth-child(7) { animation-delay: 360ms; }
-        .page-enter > *:nth-child(8) { animation-delay: 420ms; }
-        @media (prefers-reduced-motion: reduce) {
-            .page-enter,
-            .page-enter > * {
-                animation: none !important;
-                transform: none !important;
-            }
-        }
         .page-bg{
             background-color:#f5faf7;
             background-image:
@@ -224,7 +196,7 @@
         <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(74,222,128,0.12),transparent_30%),radial-gradient(circle_at_50%_70%,rgba(52,211,153,0.12),transparent_35%)]"></div>
 
         {{-- Hero --}}
-        <section class="relative pt-24 pb-10 lg:pb-14">
+        <section data-aos="fade-up" class="relative pt-24 pb-10 lg:pb-14">
             <div class="max-w-6xl mx-auto px-6 lg:px-8">
                 <div class="relative overflow-hidden rounded-[32px] shadow-[0_26px_80px_rgba(15,23,42,0.16)] bg-slate-900 text-white">
                     <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1600&q=80" alt="Consultations" class="absolute inset-0 w-full h-full object-cover">
@@ -261,7 +233,7 @@
         </section>
 
         {{-- Premium invitation --}}
-        <section class="max-w-6xl mx-auto px-6 lg:px-8 mb-8">
+        <section data-aos="fade-up" data-aos-delay="80" class="max-w-6xl mx-auto px-6 lg:px-8 mb-8">
             <div class="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-950 via-emerald-900 to-emerald-600 p-7 text-white shadow-[0_24px_65px_rgba(15,118,110,.22)] lg:p-10">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,.14),transparent_30%)]"></div>
                 <div class="relative grid gap-7 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -285,7 +257,7 @@
             </div>
         </section>
 
-        <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-2">
+        <section data-aos="fade-up" data-aos-delay="120" class="max-w-6xl mx-auto px-6 lg:px-8 mt-2">
             <div class="hospital-map-shell relative overflow-hidden rounded-[34px] p-6 lg:p-8 text-white shadow-[0_28px_80px_rgba(15,23,42,0.2)]">
                 <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.12),transparent_24%),radial-gradient(circle_at_82%_12%,rgba(56,189,248,0.14),transparent_22%)]"></div>
                 <div class="relative">
@@ -369,7 +341,7 @@
         </section>
 
         {{-- Disease slider --}}
-        <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-5">
+        <section data-aos="fade-up" data-aos-delay="160" class="max-w-6xl mx-auto px-6 lg:px-8 mt-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="space-y-1">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Penyakit Umum</p>
@@ -404,7 +376,7 @@
         </section>
 
         {{-- Latest articles --}}
-        <section id="artikel" class="max-w-6xl mx-auto px-6 lg:px-8 mt-12">
+        <section data-aos="fade-up" data-aos-delay="200" id="artikel" class="max-w-6xl mx-auto px-6 lg:px-8 mt-12">
             <div class="text-center space-y-2">
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Artikel dan Tips Terbaru</p>
                 <h2 class="text-3xl font-bold text-slate-900">Tetap update dengan info kesehatan</h2>
@@ -437,7 +409,7 @@
         </section>
 
         {{-- CTA --}}
-        <section class="max-w-6xl mx-auto px-6 lg:px-8 mt-10">
+        <section data-aos="fade-up" data-aos-delay="240" class="max-w-6xl mx-auto px-6 lg:px-8 mt-10">
             <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-700 to-emerald-500 text-white shadow-[0_26px_70px_rgba(15,23,42,0.18)]">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.08),transparent_35%)]"></div>
                 <div class="relative p-8 lg:p-12 grid lg:grid-cols-2 gap-6 items-center">
@@ -907,5 +879,6 @@
         </div>
     </footer>
 
+    <x-ai-orb />
 </body>
 </html>

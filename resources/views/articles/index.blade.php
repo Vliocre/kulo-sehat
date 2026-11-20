@@ -29,16 +29,16 @@
         <div class="max-w-6xl mx-auto px-6 lg:px-8">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-sm uppercase tracking-[0.35em] text-gray-400 font-semibold">Kumpulan Artikel</p>
-                    <h1 class="text-3xl font-bold text-gray-900 mt-2">Artikel Gaya Hidup Sehat</h1>
-                    <p class="mt-3 max-w-3xl text-sm text-gray-600">
+                    <p data-aos="fade-up" data-aos-delay="20" class="text-sm uppercase tracking-[0.35em] text-gray-400 font-semibold">Kumpulan Artikel</p>
+                    <h1 data-aos="fade-up" data-aos-delay="80" class="text-3xl font-bold text-gray-900 mt-2">Artikel Gaya Hidup Sehat</h1>
+                    <p data-aos="fade-up" data-aos-delay="140" class="mt-3 max-w-3xl text-sm text-gray-600">
                         Pilih artikel sesuai hasil BMI Anda: kurus, ideal, gemuk, atau obesitas.
                     </p>
                 </div>
             </div>
 
             @if ($fromCalculator && $selectedCategory)
-                <div class="mt-6 rounded-[28px] border border-emerald-100 bg-gradient-to-r from-emerald-50 to-lime-50 px-6 py-5">
+                <div data-aos="fade-up" data-aos-delay="180" class="mt-6 rounded-[28px] border border-emerald-100 bg-gradient-to-r from-emerald-50 to-lime-50 px-6 py-5">
                     <p class="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">Rekomendasi Dari Kalkulator BMI</p>
                     <h2 class="mt-2 text-xl font-bold text-slate-900">Mulai dari artikel kategori {{ $selectedCategory->name }}</h2>
                     <p class="mt-2 text-sm text-slate-600">
@@ -47,7 +47,7 @@
                 </div>
             @endif
 
-            <div class="mt-8 flex flex-wrap gap-3">
+            <div data-aos="fade-up" data-aos-delay="200" class="mt-8 flex flex-wrap gap-3">
                 <a href="{{ route('articles.public.index', array_filter(['search' => $search], fn ($value) => !is_null($value) && $value !== '')) }}"
                    class="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition {{ $selectedCategory ? 'bg-white text-gray-700 ring-1 ring-gray-200 hover:ring-emerald-200' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' }}">
                     Semua
@@ -61,13 +61,13 @@
             </div>
 
             @if (!empty($search))
-                <div class="mt-4 text-sm text-gray-600">
+                <div data-aos="fade-up" data-aos-delay="240" class="mt-4 text-sm text-gray-600">
                     Menampilkan hasil untuk: <span class="font-semibold text-gray-900">"{{ $search }}"</span>
                 </div>
             @endif
 
             @if ($selectedCategory)
-                <div class="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                <div data-aos="fade-up" data-aos-delay="240" class="mt-2 flex items-center gap-2 text-sm text-gray-600">
                     <span>Filter kategori:</span>
                     <span class="font-semibold text-gray-900">{{ $selectedCategory->name }}</span>
                     <a href="{{ route('articles.public.index', array_filter(['search' => $search], fn ($value) => !is_null($value) && $value !== '')) }}" class="text-green-600 hover:text-green-700 text-xs font-semibold uppercase tracking-wide">Hapus Filter</a>
@@ -76,7 +76,7 @@
 
             <div class="mt-10 grid gap-8 md:grid-cols-2">
                 @forelse ($articles as $article)
-                    <article class="bg-white rounded-[28px] shadow-[0_20px_40px_rgba(15,118,110,0.1)] overflow-hidden flex flex-col">
+                    <article data-aos="fade-up" data-aos-delay="{{ min($loop->index * 70, 280) }}" class="bg-white rounded-[28px] shadow-[0_20px_40px_rgba(15,118,110,0.1)] overflow-hidden flex flex-col">
                         @if ($article->image)
                             <img src="{{ asset('storage/' . $article->image) }}" alt="{{ $article->title }}" class="h-56 w-full object-cover">
                         @endif

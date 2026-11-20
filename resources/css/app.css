@@ -4,4 +4,77 @@
 
 :root {
     --asset-build-version: 1;
+    --aos-distance: 16px;
+    --aos-distance-inline: 14px;
+    --aos-easing: cubic-bezier(.22, 1, .36, 1);
+}
+
+[data-aos] {
+    --aos-delay: 0ms;
+    --aos-duration: 820ms;
+}
+
+/* The page templates add .aos-js before the first paint. This prevents the
+ * visible-first-paint -> hide -> reveal flash on initial navigation. */
+html.aos-js [data-aos] {
+    opacity: 0;
+}
+
+html.aos-js [data-aos].aos-init {
+    transition-property: opacity, transform;
+    transition-duration: var(--aos-duration);
+    transition-timing-function: var(--aos-easing);
+    transition-delay: var(--aos-delay);
+    will-change: opacity, transform;
+}
+
+html.aos-js [data-aos="fade"] { transform: none; }
+html.aos-js [data-aos="fade-up"] { transform: translate3d(0, var(--aos-distance), 0); }
+html.aos-js [data-aos="fade-down"] { transform: translate3d(0, calc(var(--aos-distance) * -1), 0); }
+html.aos-js [data-aos="fade-left"] { transform: translate3d(var(--aos-distance-inline), 0, 0); }
+html.aos-js [data-aos="fade-right"] { transform: translate3d(calc(var(--aos-distance-inline) * -1), 0, 0); }
+html.aos-js [data-aos="zoom-in"] { transform: scale(.985); }
+
+html.aos-js [data-aos].aos-init.aos-animate {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+}
+
+/* Legacy page-enter hooks now use the centralized scroll controller. */
+.page-enter,
+.page-enter > * {
+    animation: none;
+}
+
+@media (max-width: 767px) {
+    :root {
+        --aos-distance: 12px;
+        --aos-distance-inline: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto !important;
+    }
+
+    html.aos-js [data-aos].aos-init,
+    html.aos-js [data-aos].aos-init.aos-animate {
+        opacity: 1;
+        transform: none;
+        transition: none;
+        will-change: auto;
+    }
+
+    html.aos-js [data-aos] {
+        opacity: 1;
+        transform: none;
+    }
+
+    .page-enter,
+    .page-enter > * {
+        animation: none !important;
+        transform: none !important;
+    }
 }

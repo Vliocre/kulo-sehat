@@ -513,6 +513,51 @@ class KeluhanController extends Controller
         return back()->with('ok', 'Keluhan Premium telah diselesaikan. Riwayat percakapan tetap tersimpan.');
     }
 
+    public function destroyPremiumConversation(Request $request, Keluhan $keluhan)
+    {
+        $user = $request->user();
+        abort_unless($keluhan->isPremium(), 404);
+
+        if ($user->role === 'pengguna') {
+            abort_unless($keluhan->user_id === $user->id, 404);
+            $redirectRoute = 'premium.conversations.index';
+        } elseif ($user->isApprovedDoctor()) {
+            abort_unless($keluhan->doctor_id === $user->id, 404);
+            $redirectRoute = 'dokter.premium';
+        } else {
+            abort(403);
+        }
+
+        $imagePaths = DB::transaction(function () use ($keluhan, $user) {
+            $lockedConversation = Keluhan::query()->lockForUpdate()->findOrFail($keluhan->id);
+
+            abort_unless(
+                $lockedConversation->isPremium()
+                && ($lockedConversation->user_id === $user->id || $lockedConversation->doctor_id === $user->id),
+                404
+            );
+
+            $imagePaths = $lockedConversation->pesanPremium()
+                ->whereNotNull('gambar')
+                ->pluck('gambar')
+                ->all();
+
+            $lockedConversation->delete();
+
+            return $imagePaths;
+        });
+
+        if ($imagePaths !== []) {
+            Storage::disk('local')->delete($imagePaths);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Riwayat konsultasi berhasil dihapus.']);
+        }
+
+        return redirect()->route($redirectRoute)->with('ok', 'Riwayat konsultasi berhasil dihapus.');
+    }
+
     private function authorizePremiumDoctor(Request $request, Keluhan $keluhan): void
     {
         abort_unless(

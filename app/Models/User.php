@@ -96,6 +96,11 @@ class User extends Authenticatable
         return $this->hasMany(KeluhanPremium::class, 'sender_id');
     }
 
+    public function doctorWithdrawalRequests()
+    {
+        return $this->hasMany(DoctorWithdrawalRequest::class, 'doctor_id');
+    }
+
     public function hasActivePremium(): bool
     {
         return $this->premium_until !== null && $this->premium_until->isFuture();

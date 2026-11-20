@@ -26,18 +26,18 @@
 <main class="relative overflow-hidden pb-12 pt-28">
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_12%,rgba(16,185,129,0.12),transparent_28%)]"></div>
     <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <section class="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-emerald-800 via-emerald-600 to-teal-500 p-6 text-white shadow-[0_24px_65px_rgba(16,185,129,.3)] sm:p-8">
+        <section data-aos="fade" data-aos-duration="620" class="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-emerald-800 via-emerald-600 to-teal-500 p-6 text-white shadow-[0_24px_65px_rgba(16,185,129,.3)] sm:p-8">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,.2),transparent_35%)]"></div>
             <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <p class="text-xs font-semibold uppercase tracking-[.28em] text-emerald-100">{{ $pageMode === 'doctors' ? 'Dokter Terverifikasi' : ($pageMode === 'premium-registration' ? 'Pendaftaran Premium' : 'Pusat Konsultasi') }}</p>
+                        <p data-aos="fade-up" data-aos-delay="20" class="text-xs font-semibold uppercase tracking-[.28em] text-emerald-100">{{ $pageMode === 'doctors' ? 'Dokter Terverifikasi' : ($pageMode === 'premium-registration' ? 'Pendaftaran Premium' : 'Pusat Konsultasi') }}</p>
                         <span class="rounded-full px-3 py-1 text-[11px] font-bold {{ $user->hasActivePremium() ? 'bg-white text-emerald-700' : 'bg-white/15 text-white ring-1 ring-white/25' }}">
                             {{ $user->hasActivePremium() ? 'Premium aktif sampai '.$user->premium_until->translatedFormat('d M Y') : 'Akun gratis' }}
                         </span>
                     </div>
-                    <h1 class="mt-3 text-3xl font-bold sm:text-4xl">{{ $pageMode === 'doctors' ? 'Pilih Dokter' : ($pageMode === 'premium-registration' ? 'Aktifkan Akun Premium' : 'Keluhan Saya') }}</h1>
-                    <p class="mt-2 max-w-2xl text-emerald-50/90">{{ $pageMode === 'doctors' ? 'Temukan dokter yang telah diverifikasi dan mulai konsultasi sesuai kebutuhan Anda.' : ($pageMode === 'premium-registration' ? 'Selesaikan pendaftaran untuk melanjutkan konsultasi dengan dokter pilihan Anda.' : 'Kirim keluhan gratis dan terima satu jawaban dari dokter.') }}</p>
+                    <h1 data-aos="fade-up" data-aos-delay="80" class="mt-3 text-3xl font-bold sm:text-4xl">{{ $pageMode === 'doctors' ? 'Pilih Dokter' : ($pageMode === 'premium-registration' ? 'Aktifkan Akun Premium' : 'Keluhan Saya') }}</h1>
+                    <p data-aos="fade-up" data-aos-delay="140" class="mt-2 max-w-2xl text-emerald-50/90">{{ $pageMode === 'doctors' ? 'Temukan dokter yang telah diverifikasi dan mulai konsultasi sesuai kebutuhan Anda.' : ($pageMode === 'premium-registration' ? 'Selesaikan pendaftaran untuk melanjutkan konsultasi dengan dokter pilihan Anda.' : 'Kirim keluhan gratis dan terima satu jawaban dari dokter.') }}</p>
                 </div>
                 <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold ring-1 ring-white/30 transition hover:bg-white/20">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
@@ -90,7 +90,7 @@
             <div><p class="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">Dokter Terverifikasi</p><h2 class="mt-1 text-2xl font-bold sm:text-3xl">Pilih dokter Anda</h2><p class="mt-2 max-w-2xl text-sm text-slate-600">Hanya dokter yang telah disetujui admin yang ditampilkan.</p></div>
             <div class="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                 @forelse($doctors as $doctor)
-                    <article
+                    <article data-aos="fade-up" data-aos-delay="{{ min($loop->index * 70, 280) }}"
                         x-data="{ detailsOpen: false }"
                         @click="detailsOpen = true"
                         @keydown.enter.self.prevent="detailsOpen = true"
@@ -192,13 +192,13 @@
         @endif
 
         @if($pageMode === 'consultations')
-        <section class="mt-12 border-t border-emerald-100 pt-10">
+        <section data-aos="fade-up" class="mt-12 border-t border-emerald-100 pt-10">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div><p class="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">Tetap Gratis</p><h2 class="mt-1 text-2xl font-bold sm:text-3xl">Keluhan satu kali jawab</h2></div>
                 <div class="flex gap-2 text-xs font-bold"><span class="rounded-full bg-white px-3 py-1.5 text-slate-600">{{ $totalKeluhan }} total</span><span class="rounded-full bg-amber-100 px-3 py-1.5 text-amber-700">{{ $menunggu }} menunggu</span><span class="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-700">{{ $dijawab }} dijawab</span></div>
             </div>
             <div class="mt-5 grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
-                <div class="h-fit rounded-[28px] border border-emerald-100 bg-white p-6 shadow-[0_18px_42px_rgba(15,23,42,.08)]">
+                <div data-aos="fade-up" data-aos-delay="80" class="h-fit rounded-[28px] border border-emerald-100 bg-white p-6 shadow-[0_18px_42px_rgba(15,23,42,.08)]">
                     <h3 class="text-lg font-bold">Kirim Keluhan Gratis</h3><p class="mt-1 text-sm text-slate-500">Dokter akan memberikan satu jawaban.</p>
                     <form method="POST" action="{{ route('keluhan.store') }}" enctype="multipart/form-data" class="mt-5 space-y-3">
                         @csrf
@@ -210,7 +210,7 @@
                 </div>
                 <div class="space-y-4">
                     @forelse($keluhans as $keluhan)
-                        <article class="rounded-[26px] border border-emerald-100 bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,.07)] sm:p-6">
+                        <article data-aos="fade-up" data-aos-delay="{{ min($loop->index * 70, 280) }}" class="rounded-[26px] border border-emerald-100 bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,.07)] sm:p-6">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div><p class="text-xs font-bold uppercase tracking-[.18em] text-emerald-700">Keluhan Gratis</p><h3 class="mt-1 text-lg font-bold">{{ $keluhan->judul }}</h3><p class="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">{{ $keluhan->isi }}</p></div>
                                 <div class="flex shrink-0 items-center gap-2"><span class="rounded-full px-3 py-1 text-xs font-bold {{ $keluhan->status === 'dijawab' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">{{ ucfirst($keluhan->status) }}</span><form method="POST" action="{{ route('keluhan.destroy', $keluhan) }}" onsubmit="return confirm('Hapus keluhan ini?');">@csrf @method('DELETE')<button class="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600 hover:bg-rose-100">Hapus</button></form></div>

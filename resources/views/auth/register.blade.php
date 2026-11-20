@@ -7,6 +7,8 @@
 
     <title>Register</title>
 
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -91,6 +93,18 @@
                     </p>
 
                     <x-input-error :messages="$errors->get('role')" class="mt-2"/>
+                </div>
+
+                <!-- CLOUDFLARE TURNSTILE -->
+                <div class="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-4">
+                    <div class="flex justify-center overflow-x-auto">
+                        <div class="cf-turnstile"
+                             data-sitekey="{{ config('services.turnstile.site_key') }}"
+                             data-response-field-name="turnstile_token"
+                             data-theme="light"
+                             data-action="register"></div>
+                    </div>
+                    <x-input-error :messages="$errors->get('turnstile_token')" class="mt-2 text-center"/>
                 </div>
 
                 <!-- ACTION -->

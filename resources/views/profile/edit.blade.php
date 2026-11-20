@@ -115,6 +115,17 @@
                         </a>
                     @endif
 
+                    @if(Auth::user()->role === 'dokter')
+                        <a href="{{ route('doctor.withdrawals.index') }}"
+                            class="flex w-full items-center justify-between rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-4 font-semibold text-white shadow-lg shadow-emerald-500/15 transition hover:-translate-y-0.5 hover:shadow-xl">
+                            <span>
+                                <span class="block">Pengajuan Penarikan</span>
+                                <span class="mt-0.5 block text-xs font-normal text-emerald-100">Ajukan penarikan dan lihat riwayat pengajuan Anda</span>
+                            </span>
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/></svg>
+                        </a>
+                    @endif
+
                     <a href="{{ route('profile.saved-articles') }}"
                         class="block w-full px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition font-semibold">
                         Artikel Tersimpan

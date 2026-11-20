@@ -46,13 +46,14 @@
             </div>
         @endif
 
+        <div id="premium-delete-notice" class="mb-4 hidden rounded-xl px-4 py-3 text-sm" role="status" aria-live="polite"></div>
         <div class="grid min-h-[680px] overflow-hidden rounded-[32px] border border-white/80 bg-white/70 shadow-[0_28px_75px_rgba(15,23,42,.14)] backdrop-blur-xl lg:grid-cols-[320px_minmax(0,1fr)]">
             <aside class="border-b border-slate-100 bg-white/90 lg:border-b-0 lg:border-r">
                 <div class="border-b border-slate-100 p-5">
                     <p class="text-xs font-bold uppercase tracking-[.2em] text-emerald-700">Riwayat konsultasi</p>
                     <div class="mt-2 flex items-end justify-between">
                         <h2 class="text-xl font-bold">Percakapan Anda</h2>
-                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500">{{ $conversations->count() }}</span>
+                        <span id="premium-history-count" class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500">{{ $conversations->count() }}</span>
                     </div>
                 </div>
 
@@ -73,7 +74,8 @@
                             $lastMessage = $item->pesanPremium->last();
                             $unread = $item->pesanPremium->where('sender_id', '!=', $user->id)->whereNull('dibaca_at')->count();
                         @endphp
-                        <a href="{{ route('premium.conversations.show', array_filter(['keluhan' => $item->id, 'draft_doctor' => $draftDoctor?->id])) }}" class="block rounded-2xl border p-3 transition {{ $isSelected ? 'border-emerald-300 bg-emerald-50 ring-2 ring-emerald-100' : 'border-transparent hover:border-emerald-100 hover:bg-slate-50' }}">
+                        <div class="relative" data-premium-history-item data-selected="{{ $isSelected ? 'true' : 'false' }}">
+                        <a href="{{ route('premium.conversations.show', array_filter(['keluhan' => $item->id, 'draft_doctor' => $draftDoctor?->id])) }}" class="block rounded-2xl border p-3 pr-12 transition {{ $isSelected ? 'border-emerald-300 bg-emerald-50 ring-2 ring-emerald-100' : 'border-transparent hover:border-emerald-100 hover:bg-slate-50' }}">
                             <div class="flex items-start gap-3">
                                 <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 text-sm font-bold text-white">{{ collect(explode(' ', $item->doctor->name ?? 'Dokter'))->filter()->take(2)->map(fn($part) => mb_substr($part, 0, 1))->implode('') }}</div>
                                 <div class="min-w-0 flex-1">
@@ -83,6 +85,8 @@
                                 </div>
                             </div>
                         </a>
+                        <form method="POST" action="{{ route('premium.conversations.destroy', $item) }}" data-premium-delete-form class="absolute right-2 top-2">@csrf @method('DELETE')<button type="submit" aria-label="Hapus riwayat {{ $item->judul }}" title="Hapus riwayat" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-300"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg></button></form>
+                        </div>
                     @empty
                         @if(!$draftDoctor)
                             <div class="px-3 py-10 text-center"><div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a10.8 10.8 0 0 1-4-.75L3 20l1.3-3.5A7.35 7.35 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"/></svg></div><p class="mt-3 text-sm font-semibold">Belum ada percakapan</p><p class="mt-1 text-xs leading-5 text-slate-500">Pilih dokter untuk memulai konsultasi Premium.</p></div>
@@ -91,7 +95,7 @@
                 </div>
             </aside>
 
-            <section class="flex min-h-[680px] min-w-0 flex-col bg-white">
+            <section id="premium-conversation-panel" class="flex min-h-[680px] min-w-0 flex-col bg-white">
                 @if(($showDraft ?? false) && $draftDoctor)
                     <header class="border-b border-slate-100 px-6 py-5 sm:px-8">
                         <div class="flex items-center gap-4">
@@ -186,5 +190,39 @@
         </div>
     </div>
 </main>
+<script>
+(() => {
+    const notice = document.getElementById('premium-delete-notice');
+    document.querySelectorAll('[data-premium-delete-form]').forEach((form) => form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!window.confirm('Hapus riwayat konsultasi ini? Pesan dan lampiran dalam riwayat ini juga akan dihapus.')) return;
+        const card = form.closest('[data-premium-history-item]');
+        const wasSelected = card.dataset.selected === 'true';
+        const button = form.querySelector('button');
+        button.disabled = true;
+        try {
+            const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Riwayat gagal dihapus. Silakan coba lagi.');
+            const list = card.parentElement;
+            card.remove();
+            const remaining = document.querySelectorAll('[data-premium-history-item]').length;
+            document.getElementById('premium-history-count').textContent = remaining;
+            if (!remaining) {
+                const empty = document.createElement('div');
+                empty.className = 'px-3 py-10 text-center text-sm text-slate-500';
+                empty.textContent = 'Belum ada percakapan. Pilih dokter untuk memulai konsultasi Premium.';
+                list.append(empty);
+            }
+            if (wasSelected) document.getElementById('premium-conversation-panel').innerHTML = '<div class="flex flex-1 items-center justify-center p-8 text-center"><div><h2 class="text-xl font-bold text-slate-800">Riwayat dihapus</h2><p class="mt-2 text-sm text-slate-500">Pilih percakapan lain untuk melihat riwayatnya.</p></div></div>';
+            notice.textContent = result.message || 'Riwayat konsultasi berhasil dihapus.';
+            notice.className = 'mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800';
+        } catch (error) {
+            notice.textContent = error.message;
+            notice.className = 'mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800';
+        } finally { button.disabled = false; }
+    }));
+})();
+</script>
 </body>
 </html>

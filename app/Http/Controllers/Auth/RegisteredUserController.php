@@ -7,10 +7,13 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -37,7 +40,31 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => ['nullable', 'in:dokter,pengguna'],
+            'turnstile_token' => ['required', 'string'],
+        ], [
+            'turnstile_token.required' => 'Silakan selesaikan CAPTCHA terlebih dahulu.',
         ]);
+
+        try {
+            $turnstileResponse = Http::asForm()
+                ->connectTimeout(5)
+                ->timeout(10)
+                ->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+                    'secret' => config('services.turnstile.secret_key'),
+                    'response' => $validated['turnstile_token'],
+                    'remoteip' => $request->ip(),
+                ]);
+        } catch (ConnectionException) {
+            throw ValidationException::withMessages([
+                'turnstile_token' => 'Verifikasi keamanan sedang tidak tersedia. Silakan coba lagi.',
+            ]);
+        }
+
+        if (! $turnstileResponse->successful() || ! $turnstileResponse->json('success', false)) {
+            throw ValidationException::withMessages([
+                'turnstile_token' => 'Verifikasi keamanan gagal. Silakan selesaikan CAPTCHA dan coba lagi.',
+            ]);
+        }
 
         $role = $validated['role'] ?? 'pengguna';
 

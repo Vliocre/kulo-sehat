@@ -18,7 +18,7 @@
     <x-public-navbar />
 
     <main class="pt-28 pb-20">
-        <div class="max-w-6xl mx-auto px-6 lg:px-8 grid lg:grid-cols-[minmax(0,2fr)_320px] gap-10 lg:gap-12 items-start">
+        <div data-aos="fade-up" data-aos-duration="720" class="max-w-6xl mx-auto px-6 lg:px-8 grid lg:grid-cols-[minmax(0,2fr)_320px] gap-10 lg:gap-12 items-start">
             <article class="bg-white/95 rounded-[32px] shadow-[0_30px_70px_rgba(16,185,129,0.15)] ring-1 ring-emerald-50 p-8 md:p-12 space-y-8">
                 <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
                     @if ($article->category)

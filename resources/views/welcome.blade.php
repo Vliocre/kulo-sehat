@@ -40,7 +40,7 @@
         {{-- Hero --}}
         <section class="relative pt-28 pb-16 lg:pb-20">
             <div class="max-w-6xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-6 relative">
+                <div data-aos="fade-up" data-aos-delay="120" data-aos-duration="900" class="space-y-6 relative">
                     @if (session('status'))
                         <div class="rounded-2xl border border-emerald-200 bg-white/90 px-5 py-4 text-sm text-emerald-800 shadow-sm">
                             {{ session('status') }}
@@ -80,7 +80,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="relative">
+                <div data-aos="fade-up" data-aos-delay="280" data-aos-duration="1000" class="relative">
                     <div class="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-emerald-200/40 blur-3xl"></div>
                     <div class="relative rounded-[28px] overflow-hidden shadow-[0_26px_80px_rgba(15,23,42,0.14)] ring-1 ring-white/50 bg-gradient-to-br from-white via-emerald-50/40 to-emerald-100/40">
                         <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(52,211,153,0.12),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(74,222,128,0.12),transparent_35%)]"></div>

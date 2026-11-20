@@ -9,7 +9,7 @@
     $categoryItems = collect($categories);
 @endphp
 
-<header {{ $attributes->merge(['class' => trim($class . ' z-50')]) }}>
+<header data-aos="fade-down" data-aos-duration="520" data-aos-delay="0" {{ $attributes->merge(['class' => trim($class . ' z-50')]) }}>
     <div class="relative z-50 max-w-7xl mx-auto bg-white/95 backdrop-blur-sm rounded-[28px] shadow-lg">
         <nav class="px-6 py-4">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

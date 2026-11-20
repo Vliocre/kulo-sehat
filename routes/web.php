@@ -16,12 +16,15 @@ use App\Http\Controllers\AuthorProfileController;
 use App\Models\TopicGuide;
 use App\Http\Controllers\Doctor\DashboardController as DoctorDashboardController;
 use App\Http\Controllers\Doctor\ArticleController as DoctorArticleController;
+use App\Http\Controllers\Doctor\WithdrawalController as DoctorWithdrawalController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Admin\TopicGuideController as AdminTopicGuideController;
 use App\Http\Controllers\KalkulatorController;
 use App\Http\Controllers\KeluhanController;
+use App\Http\Controllers\AiAssistantController;
 
 // RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -112,6 +115,8 @@ Route::middleware(['auth', 'verified', 'role:dokter'])
     ->as('doctor.')
     ->group(function () {
         Route::get('/dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/pengajuan-penarikan', [DoctorWithdrawalController::class, 'index'])->name('withdrawals.index');
+        Route::post('/pengajuan-penarikan', [DoctorWithdrawalController::class, 'store'])->name('withdrawals.store');
         Route::resource('articles', DoctorArticleController::class);
 });
 Route::middleware(['auth', 'verified', 'role:dokter'])->group(function () {
@@ -128,6 +133,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])
     ->as('admin.')
     ->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals.index');
+        Route::get('/withdrawals/{withdrawal}', [AdminWithdrawalController::class, 'show'])->name('withdrawals.show');
+        Route::patch('/withdrawals/{withdrawal}/approve', [AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
+        Route::patch('/withdrawals/{withdrawal}/reject', [AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
         Route::post('users/{user}/approve-doctor', [UserManagementController::class, 'approveDoctor'])->name('users.approve-doctor');
         Route::post('users/{user}/reject-doctor', [UserManagementController::class, 'rejectDoctor'])->name('users.reject-doctor');
         Route::get('/premium', [KeluhanController::class, 'indexPremiumAdmin'])->name('premium.index');
@@ -177,6 +186,10 @@ Route::middleware(['auth', 'verified', 'role:pengguna'])->group(function(){
         ->whereNumber('keluhan')
         ->name('premium.conversations.show');
 
+    Route::delete('/percakapan-premium/{keluhan}', [KeluhanController::class, 'destroyPremiumConversation'])
+        ->whereNumber('keluhan')
+        ->name('premium.conversations.destroy');
+
     Route::post('/keluhan', 
         [KeluhanController::class,'store'])
         ->name('keluhan.store');
@@ -197,6 +210,9 @@ Route::middleware(['auth', 'verified', 'role:dokter'])->group(function () {
         ->name('dokter.keluhan');
     Route::get('/dokter/layanan-premium', [KeluhanController::class, 'indexPremiumDokter'])->name('dokter.premium');
     Route::get('/dokter/layanan-premium/{keluhan}', [KeluhanController::class, 'indexPremiumDokter'])->name('dokter.premium.show');
+    Route::delete('/dokter/layanan-premium/{keluhan}', [KeluhanController::class, 'destroyPremiumConversation'])
+        ->whereNumber('keluhan')
+        ->name('dokter.premium.destroy');
 
     Route::post('/dokter/keluhan/{keluhan}',
         [KeluhanController::class, 'jawab'])
@@ -212,6 +228,11 @@ Route::middleware(['auth', 'verified', 'role:dokter'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai-assistant.index');
+    Route::post('/ai-assistant/messages', [AiAssistantController::class, 'storeMessage'])->name('ai-assistant.messages.store');
+    Route::get('/ai-assistant/messages/{message}/images/{image}', [AiAssistantController::class, 'image'])
+        ->whereNumber('image')
+        ->name('ai-assistant.image');
     Route::post('/keluhan-premium/{keluhan}/pesan',
         [KeluhanController::class, 'sendPremiumMessage'])
         ->name('keluhan.premium.message');

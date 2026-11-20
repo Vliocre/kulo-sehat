@@ -16,20 +16,20 @@
 
                 <!-- Kolom Teks di Kiri -->
                 <div class="text-white">
-                    <p class="text-lg">Temukan Informasi Kesehatan Terpercaya</p>
-                    <h1 class="text-5xl font-bold mt-2 leading-tight">
+                    <p data-aos="fade-up" data-aos-delay="20" class="text-lg">Temukan Informasi Kesehatan Terpercaya</p>
+                    <h1 data-aos="fade-up" data-aos-delay="80" class="text-5xl font-bold mt-2 leading-tight">
                         Mari Bergabung Bersama Kami
                     </h1>
-                    <p class="mt-4 text-white/90">
+                    <p data-aos="fade-up" data-aos-delay="150" class="mt-4 text-white/90">
                         Selamat datang di Helavio. Kami menyediakan berbagai artikel dan panduan informatif mengenai penyakit umum, gejala, cara pencegahan, serta penanganan awal yang bisa Anda lakukan.
                     </p>
                 </div>
 
                 <!-- Kolom Form Login di Kanan -->
                 <div class="w-full">
-                    <div class="bg-white/95 backdrop-blur-sm p-8 sm:p-12 rounded-2xl shadow-2xl">
+                    <div data-aos="fade-up" data-aos-delay="120" data-aos-duration="700" class="bg-white/95 backdrop-blur-sm p-8 sm:p-12 rounded-2xl shadow-2xl">
 
-                        <div class="text-center mb-8">
+                        <div data-aos="fade-up" data-aos-delay="190" class="text-center mb-8">
                             <h2 class="text-2xl font-bold text-gray-800">Selamat Datang!</h2>
                             <p class="text-gray-500">Silakan masuk ke akun Anda</p>
                         </div>
@@ -41,7 +41,7 @@
                             @csrf
 
                             <!-- Email Address -->
-                            <div>
+                            <div data-aos="fade-up" data-aos-delay="240">
                                 <label for="email" class="sr-only">Email</label>
                                 <input id="email"
                                     class="block mt-1 w-full border-gray-300 rounded-full shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-3"
@@ -56,7 +56,7 @@
                             </div>
 
                             <!-- Password -->
-                            <div class="mt-4">
+                            <div data-aos="fade-up" data-aos-delay="280" class="mt-4">
                                 <label for="password" class="sr-only">Password</label>
                                 <input id="password"
                                     class="block mt-1 w-full border-gray-300 rounded-full shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-3"
@@ -69,7 +69,7 @@
                             </div>
 
                             <!-- 🔹 Pilihan Role (User / Dokter) -->
-                            <div class="mt-5">
+                            <div data-aos="fade-up" data-aos-delay="320" class="mt-5">
                                 <div class="mb-2 flex items-center justify-between gap-3">
                                     <p class="text-sm font-medium text-gray-700">Masuk sebagai</p>
                                     <button type="button"
@@ -102,7 +102,7 @@
                             </div>
 
                             <!-- Remember Me -->
-                            <div class="block mt-4">
+                            <div data-aos="fade-up" data-aos-delay="320" class="block mt-4">
                                 <label for="remember_me" class="inline-flex items-center">
                                     <input id="remember_me"
                                            type="checkbox"
@@ -112,7 +112,7 @@
                                 </label>
                             </div>
 
-                            <div class="flex items-center justify-end mt-4">
+                            <div data-aos="fade-up" data-aos-delay="320" class="flex items-center justify-end mt-4">
                                 @if (Route::has('password.request'))
                                     <a class="underline text-sm text-gray-600 hover:text-gray-900"
                                        href="{{ route('password.request') }}">
@@ -132,13 +132,13 @@
                                 <div class="h-px flex-1 bg-gray-200"></div>
                             </div>
 
-                            <a href="{{ route('auth.google.redirect') }}"
+                            <a data-aos="fade-up" data-aos-delay="320" href="{{ route('auth.google.redirect') }}"
                                class="inline-flex w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                                 <span class="flex h-5 w-5 items-center justify-center rounded-full bg-white text-sm font-bold text-blue-600">G</span>
                                 Masuk dengan Google
                             </a>
 
-                            <div class="text-center mt-6">
+                            <div data-aos="fade-up" data-aos-delay="320" class="text-center mt-6">
                                 <p class="text-sm text-gray-600">
                                     Belum punya akun?
                                     <a href="{{ route('register') }}" class="font-medium text-green-600 hover:text-green-500">

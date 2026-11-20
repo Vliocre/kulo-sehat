@@ -27,7 +27,7 @@
     <main class="min-h-screen pb-16">
         <section class="relative pt-28 sm:pt-32 md:pt-36 pb-10 overflow-hidden">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-                <div class="hero-card px-6 py-10 sm:px-10 md:px-14">
+                <div data-aos="fade-up" data-aos-duration="720" class="hero-card px-6 py-10 sm:px-10 md:px-14">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <p class="text-xs uppercase tracking-[0.35em] text-gray-400 font-semibold">Panel Dokter</p>
@@ -42,12 +42,12 @@
                 </div>
 
                 @if (session('success'))
-                    <div class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                    <div data-aos="fade" data-aos-delay="80" class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                         {{ session('success') }}
                     </div>
                 @endif
 
-                <div class="table-card mt-8">
+                <div data-aos="fade-up" data-aos-delay="120" class="table-card mt-8">
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <thead class="bg-gray-50 text-xs uppercase tracking-widest text-gray-500">
